@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JC Soluções - Painel de Vendas Seguro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --surface: #ffffff;
+            --background: #fdfdff;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%), 
+                              radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.05) 0px, transparent 50%);
+            min-height: 100vh;
+            user-select: none; /* Impede a seleção de texto para dificultar cópia */
+        }
+
+        .premium-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.8s ease-in-out;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .venda-travada .input-locked {
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        .parcela-paga {
+            opacity: 0.8;
+            pointer-events: none; /* Trava toda a interação com a linha da parcela */
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .premium-card { box-shadow: none; border: 1px solid #eee; }
+        }
+    </style>
+</head>
+<body class="antialiased text-slate-800" oncontextmenu="return false;"> <!-- Bloqueio de clique direito -->
+
+    <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
+        
+        <!-- Cabeçalho Principal -->
+        <nav class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6 no-print">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 p-2.5 rounded-2xl shadow-lg shadow-indigo-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">JC Soluções Digitais</h1>
+                    <p class="text-slate-500 text-sm font-medium flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Ambiente Seguro & Monitorado
+                    </p>
+                </div>
+            </div>
+
+            <div id="topStats" class="hidden flex items-center gap-6 animate-in fade-in duration-700">
+                <div class="text-right">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Estado da Quitação</p>
+                    <p id="totalPercentText" class="text-xl font-extrabold text-indigo-600">0%</p>
+                </div>
+                <div class="relative w-16 h-16">
+                    <svg class="w-full h-full" viewBox="0 0 100 100">
+                        <circle class="text-slate-100" stroke-width="8" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"/>
+                        <circle id="progressCircle" class="text-indigo-600 progress-ring__circle" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"/>
+                    </svg>
+                </div>
+            </div>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Painel de Configuração -->
+            <aside class="lg:col-span-4 no-print">
+                <div id="configCard" class="premium-card rounded-[32px] p-8">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-xl font-bold">Painel de Controle</h2>
+                        <span id="lockStatusIcon" class="hidden text-rose-500 animate-pulse">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </span>
+                    </div>
+
+                    <div id="mainForm" class="space-y-5">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Título do Serviço</label>
+                            <input type="text" id="inTitulo" placeholder="Ex: Manutenção de Servidores" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white/50 outline-none transition-all">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Preço Unitário</label>
+                                <input type="number" id="inValor" placeholder="0.00" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white/50 outline-none transition-all">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Qtd.</label>
+                                <input type="number" id="inQtd" value="1" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white/50 outline-none transition-all">
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Nome do Comprador</label>
+                            <input type="text" id="inComprador" placeholder="Cliente final" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white/50 outline-none transition-all">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Método Preferencial</label>
+                            <select id="inMetodo" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white/50 outline-none transition-all appearance-none">
+                                <option value="Pix">Transferência Bancária / Pix</option>
+                                <option value="Cartão">Cartão de Crédito</option>
+                                <option value="Boleto">Boleto Bancário</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Nº de Parcelas</label>
+                            <select id="inParcelas" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white/50 outline-none transition-all">
+                                <option value="1">Pagamento Único</option>
+                                <option value="2">2 Parcelas</option>
+                                <option value="3">3 Parcelas</option>
+                                <option value="6">6 Parcelas</option>
+                                <option value="10">10 Parcelas</option>
+                                <option value="12">12 Parcelas</option>
+                            </select>
+                        </div>
+
+                        <button onclick="gerarVendaSegura()" id="btnAction" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 mt-4 group">
+                            <span>Finalizar e Travar Venda</span>
+                            <svg class="group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        </button>
+                    </div>
+
+                    <div id="lockedMessage" class="hidden mt-6 p-6 bg-indigo-50 border border-indigo-100 rounded-[24px] text-center">
+                        <div class="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white shadow-lg shadow-indigo-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-1">Venda Autenticada</p>
+                        <p class="text-sm font-semibold text-slate-700 mb-4">Os termos contratuais foram congelados com sucesso.</p>
+                        <button onclick="window.print()" class="w-full text-xs bg-white border border-indigo-200 text-indigo-600 font-bold py-3 rounded-xl hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect width="12" height="8" x="6" y="14"></rect></svg>
+                            Exportar Comprovante
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Painel de Acompanhamento -->
+            <main class="lg:col-span-8 space-y-6">
+                
+                <div id="emptyState" class="premium-card rounded-[32px] p-12 text-center flex flex-col items-center justify-center min-h-[500px]">
+                    <div class="bg-slate-50 p-8 rounded-[40px] mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-slate-800 mb-2">Aguardando Parâmetros</h3>
+                    <p class="text-slate-500 max-w-sm">Insira as informações de venda para visualizar o cronograma de liquidação.</p>
+                </div>
+
+                <div id="activeState" class="hidden space-y-6 animate-in slide-in-from-bottom-4 duration-700">
+                    
+                    <!-- KPIs -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="premium-card rounded-3xl p-5 border-l-4 border-indigo-500 bg-white">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Montante Global</p>
+                            <h4 id="resTotal" class="text-lg font-extrabold text-slate-900">R$ 0,00</h4>
+                        </div>
+                        <div class="premium-card rounded-3xl p-5 border-l-4 border-emerald-500 bg-white">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Liquidado</p>
+                            <h4 id="resPago" class="text-lg font-extrabold text-emerald-600">R$ 0,00</h4>
+                        </div>
+                        <div class="premium-card rounded-3xl p-5 border-l-4 border-rose-500 bg-white">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Saldo Devedor</p>
+                            <h4 id="resPendente" class="text-lg font-extrabold text-rose-600">R$ 0,00</h4>
+                        </div>
+                        <div class="premium-card rounded-3xl p-5 border-l-4 border-slate-800 bg-white">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Valor Parcela</p>
+                            <h4 id="resParcela" class="text-lg font-extrabold text-slate-800">R$ 0,00</h4>
+                        </div>
+                    </div>
+
+                    <!-- Cronograma -->
+                    <div class="premium-card rounded-[32px] overflow-hidden border border-slate-100">
+                        <div class="px-8 py-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center bg-white gap-2">
+                            <div>
+                                <h3 class="text-lg font-bold">Plano de Pagamentos Irrevogável</h3>
+                                <p id="vendaDesc" class="text-sm text-slate-500 font-medium"></p>
+                            </div>
+                            <div class="no-print">
+                                <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
+                                    Sincronizado
+                                </span>
+                            </div>
+                        </div>
+
+                        <div id="listaParcelas" class="divide-y divide-slate-50">
+                            <!-- Inserção Dinâmica -->
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Feedback UI -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-4 rounded-[20px] shadow-2xl transition-all translate-y-10 opacity-0 pointer-events-none z-50 flex items-center gap-4">
+        <div id="toastIcon" class="w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <span id="toastText" class="text-xs font-bold uppercase tracking-widest">Procedimento realizado</span>
+    </div>
+
+    <script>
+        // SEGURANÇA: Bloqueio de Teclas F12 e Atalhos de Inspeção
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false; // F12
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false; // Ctrl+Shift+C
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; // Ctrl+Shift+J
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U
+        };
+
+        // Estado do Sistema
+        let db = {
+            titulo: "",
+            valorTotal: 0,
+            parcelas: [],
+            travado: false
+        };
+
+        // Atualizado para Real Brasileiro (pt-BR / BRL)
+        const moeda = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        function dispararAviso(texto, cor = 'bg-indigo-500') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').innerText = texto;
+            document.getElementById('toastIcon').className = `w-5 h-5 ${cor} rounded-full flex items-center justify-center`;
+            
+            toast.classList.remove('opacity-0', 'translate-y-10');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-10');
+            }, 3500);
+        }
+
+        function gerarVendaSegura() {
+            const tit = document.getElementById('inTitulo').value;
+            const val = parseFloat(document.getElementById('inValor').value);
+            const qtd = parseInt(document.getElementById('inQtd').value);
+            const cli = document.getElementById('inComprador').value;
+            const par = parseInt(document.getElementById('inParcelas').value);
+            const met = document.getElementById('inMetodo').value;
+
+            if(!tit || isNaN(val) || !cli) {
+                dispararAviso("Dados insuficientes para selar contrato", "bg-rose-500");
+                return;
+            }
+
+            const total = val * qtd;
+            db = {
+                titulo: tit,
+                comprador: cli,
+                metodo: met,
+                valorTotal: total,
+                valorParcela: total / par,
+                travado: true,
+                parcelas: Array.from({ length: par }, (_, i) => ({
+                    id: i + 1,
+                    valor: total / par,
+                    pago: false,
+                    data: "",
+                    comprovativo: null
+                }))
+            };
+
+            // Trancagem da Interface de Edição
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('activeState').classList.remove('hidden');
+            document.getElementById('topStats').classList.remove('hidden');
+            document.getElementById('mainForm').classList.add('hidden');
+            document.getElementById('lockedMessage').classList.remove('hidden');
+            document.getElementById('lockStatusIcon').classList.remove('hidden');
+            document.getElementById('configCard').classList.add('venda-travada');
+
+            atualizarPainel();
+            dispararAviso("Venda Selada Permanentemente");
+        }
+
+        function atualizarPainel() {
+            const lista = document.getElementById('listaParcelas');
+            lista.innerHTML = '';
+
+            document.getElementById('resTotal').innerText = moeda(db.valorTotal);
+            document.getElementById('resParcela').innerText = moeda(db.valorParcela);
+            document.getElementById('vendaDesc').innerText = `${db.titulo} - Adquirido por ${db.comprador}`;
+
+            let pagoTotal = 0;
+
+            db.parcelas.forEach((p, index) => {
+                if(p.pago) pagoTotal += p.valor;
+                
+                const item = document.createElement('div');
+                // Adiciona classe de trava se a parcela estiver paga
+                item.className = `p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all ${p.pago ? 'parcela-paga bg-slate-50/50' : 'hover:bg-indigo-50/30'}`;
+                
+                item.innerHTML = `
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-lg shadow-sm border ${p.pago ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white border-slate-200 text-slate-400'}">
+                            ${p.id}
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Parcela</p>
+                            <h5 class="font-extrabold text-slate-800">${moeda(p.valor)}</h5>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-6 no-print">
+                        <div class="flex flex-col">
+                            <label class="text-[9px] font-bold text-slate-400 uppercase mb-1">Data de Liquidação</label>
+                            <input type="date" value="${p.data}" onchange="salvarValor(${index}, 'data', this.value)" 
+                                class="text-xs bg-white border border-slate-200 rounded-xl p-2 outline-none" ${p.pago ? 'disabled' : ''}>
+                        </div>
+                        
+                        <div class="flex flex-col">
+                            <label class="text-[9px] font-bold text-slate-400 uppercase mb-1">Comprovante</label>
+                            <label class="${p.pago ? 'cursor-default opacity-50' : 'cursor-pointer hover:text-indigo-800'} flex items-center gap-2 text-xs font-semibold text-indigo-600 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                <span>${p.comprovativo ? 'Submetido' : 'Anexar'}</span>
+                                <input type="file" class="hidden" onchange="subirArquivo(${index}, this)" ${p.pago ? 'disabled' : ''}>
+                            </label>
+                        </div>
+
+                        <button onclick="liquidar(${index})" 
+                            class="px-5 py-2.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest transition-all
+                            ${p.pago ? 'bg-emerald-500 text-white border-transparent' : 'bg-white border border-slate-200 text-slate-600 hover:border-emerald-400 hover:text-emerald-600'}">
+                            ${p.pago ? '✓ Liquidado' : 'Validar Pagamento'}
+                        </button>
+                    </div>
+
+                    <!-- Exibição de Impressão -->
+                    <div class="hidden print:block text-right">
+                        <p class="text-xs font-bold ${p.pago ? 'text-emerald-600' : 'text-slate-400'}">${p.pago ? 'LIQUIDADO' : 'AGUARDANDO'}</p>
+                        <p class="text-[10px] text-slate-500">${p.data || '--/--/----'}</p>
+                    </div>
+                `;
+                lista.appendChild(item);
+            });
+
+            const pendente = db.valorTotal - pagoTotal;
+            document.getElementById('resPago').innerText = moeda(pagoTotal);
+            document.getElementById('resPendente').innerText = moeda(pendente);
+            atualizarAnel(pagoTotal);
+        }
+
+        function salvarValor(idx, key, val) {
+            if(db.parcelas[idx].pago) return; // Bloqueio extra no código
+            db.parcelas[idx][key] = val;
+        }
+
+        function subirArquivo(idx, input) {
+            if(input.files.length > 0 && !db.parcelas[idx].pago) {
+                db.parcelas[idx].comprovativo = input.files[0].name;
+                atualizarPainel();
+                dispararAviso("Documento anexado à parcela");
+            }
+        }
+
+        function liquidar(idx) {
+            const p = db.parcelas[idx];
+            if(p.pago) return; // Se já está pago, o botão nem deveria disparar, mas aqui é o travamento lógico
+
+            if(!p.data) {
+                dispararAviso("Data obrigatória para validação", "bg-rose-500");
+                return;
+            }
+            
+            p.pago = true;
+            atualizarPainel();
+            dispararAviso(`Parcela #${p.id} bloqueada por quitação`);
+        }
+
+        function atualizarAnel(valorPago) {
+            const percent = (valorPago / db.valorTotal) * 100 || 0;
+            const circulo = document.getElementById('progressCircle');
+            const raio = circulo.r.baseVal.value;
+            const circunf = 2 * Math.PI * raio;
+            
+            circulo.style.strokeDasharray = `${circunf} ${circunf}`;
+            circulo.style.strokeDashoffset = circunf - (percent / 100 * circunf);
+            
+            document.getElementById('totalPercentText').innerText = `${Math.round(percent)}%`;
+            
+            if(percent === 100) {
+                document.getElementById('totalPercentText').className = "text-xl font-extrabold text-emerald-600";
+                circulo.classList.replace('text-indigo-600', 'text-emerald-500');
+                dispararAviso("Venda Totalmente Liquidada!", "bg-emerald-600");
+            }
+        }
+    </script>
+</body>
+</html>
