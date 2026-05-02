@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JC Soluções - Dashboard Local Seguro</title>
+    <title>JC Soluções - Dashboard de Vendas Seguro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -21,33 +21,39 @@
                               radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.05) 0px, transparent 50%);
             min-height: 100vh;
             user-select: none;
+            overflow-x: hidden;
         }
 
         .premium-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
         }
 
         .progress-ring__circle {
-            transition: stroke-dashoffset 0.8s ease-in-out;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             transform: rotate(-90deg);
             transform-origin: 50% 50%;
         }
 
         .parcela-paga {
-            opacity: 0.75;
+            opacity: 0.7;
             pointer-events: none !important;
-            filter: grayscale(0.5);
+            filter: grayscale(0.4);
+            background-color: #f0fdf4 !important;
         }
 
-        .input-locked {
-            background-color: #f8fafc !important;
-            border-color: #e2e8f0 !important;
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        }
+
+        input:disabled, select:disabled {
+            background-color: #f1f5f9 !important;
             color: #94a3b8 !important;
             cursor: not-allowed !important;
+            border-color: #e2e8f0 !important;
         }
 
         @media print {
@@ -61,184 +67,205 @@
 
     <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
         
-        <!-- Cabeçalho -->
-        <nav class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6 no-print">
-            <div class="flex items-center gap-3">
-                <div class="bg-indigo-600 p-2.5 rounded-2xl shadow-lg shadow-indigo-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <!-- Header -->
+        <nav class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6 no-print">
+            <div class="flex items-center gap-4">
+                <div class="bg-indigo-600 p-3 rounded-2xl shadow-xl shadow-indigo-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 </div>
                 <div>
                     <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">JC Soluções Digitais</h1>
                     <p class="text-slate-500 text-sm font-medium flex items-center gap-2">
-                        <span class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
-                        Segurança Local Integrada
+                        <span class="flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                        Sistema de Cobrança Protegido
                     </p>
                 </div>
             </div>
 
-            <div id="topStats" class="hidden flex items-center gap-6">
+            <div id="statsHeader" class="hidden flex items-center gap-6 animate-in fade-in slide-in-from-right-4 duration-500">
                 <div class="text-right">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado da Dívida</p>
-                    <p id="totalPercentText" class="text-xl font-extrabold text-indigo-600">0%</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Progresso de Quitação</p>
+                    <p id="totalPercentText" class="text-xl font-black text-indigo-600">0%</p>
                 </div>
-                <div class="relative w-16 h-16">
+                <div class="relative w-14 h-14">
                     <svg class="w-full h-full" viewBox="0 0 100 100">
-                        <circle class="text-slate-100" stroke-width="8" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"/>
-                        <circle id="progressCircle" class="text-indigo-600 progress-ring__circle" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"/>
+                        <circle class="text-slate-100" stroke-width="10" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"/>
+                        <circle id="progressCircle" class="text-indigo-600 progress-ring__circle" stroke-width="10" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"/>
                     </svg>
                 </div>
             </div>
         </nav>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <!-- Configuração -->
+            <!-- Sidebar: Configuração da Venda -->
             <aside class="lg:col-span-4 no-print">
-                <div id="configCard" class="premium-card rounded-[32px] p-8">
-                    <div class="flex items-center justify-between mb-8">
-                        <h2 class="text-xl font-bold">Configurar Venda</h2>
-                        <span id="lockStatusIcon" class="hidden text-rose-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        </span>
+                <div id="configCard" class="premium-card rounded-[32px] p-8 sticky top-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            Configuração
+                        </h2>
+                        <div id="lockIcon" class="hidden text-rose-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </div>
                     </div>
 
-                    <div id="mainForm" class="space-y-5">
-                        <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Produto/Serviço</label>
-                            <input type="text" id="inTitulo" placeholder="Ex: Gestão de Tráfego" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                    <div id="formVenda" class="space-y-4">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Título da Venda</label>
+                            <input type="text" id="inTitulo" placeholder="Ex: Desenvolvimento Web" class="w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
                         </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-1">
-                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Valor Total (R$)</label>
-                                <input type="number" id="inValor" placeholder="0.00" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white outline-none transition-all">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Produto / Serviço</label>
+                            <input type="text" id="inProduto" placeholder="O que foi vendido?" class="w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Valor Un. (R$)</label>
+                                <input type="number" id="inValor" placeholder="0.00" class="w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none transition-all">
                             </div>
-                            <div class="space-y-1">
-                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Qtd.</label>
-                                <input type="number" id="inQtd" value="1" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white outline-none transition-all">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Quantidade</label>
+                                <input type="number" id="inQtd" value="1" class="w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none transition-all">
                             </div>
                         </div>
-
-                        <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Cliente</label>
-                            <input type="text" id="inComprador" placeholder="Nome completo" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white outline-none transition-all">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Responsável pela Compra</label>
+                            <input type="text" id="inComprador" placeholder="Nome do cliente" class="w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none transition-all">
                         </div>
-
-                        <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Forma de Pagamento</label>
-                            <select id="inParcelas" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white outline-none transition-all">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Parcelas</label>
+                            <select id="inParcelas" class="w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none transition-all bg-white">
                                 <option value="1">À Vista</option>
-                                <option value="2">2 Parcelas</option>
-                                <option value="3">3 Parcelas</option>
-                                <option value="6">6 Parcelas</option>
-                                <option value="10">10 Parcelas</option>
-                                <option value="12">12 Parcelas</option>
+                                <option value="2">2x Sem Juros</option>
+                                <option value="3">3x Sem Juros</option>
+                                <option value="6">6x Sem Juros</option>
+                                <option value="10">10x Sem Juros</option>
+                                <option value="12">12x Sem Juros</option>
                             </select>
                         </div>
 
-                        <button onclick="gerarVendaLocal()" id="btnAction" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 mt-4 group">
-                            <span>Sincronizar e Bloquear</span>
-                            <svg class="group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        <button onclick="gerarEVincular()" id="btnGerar" class="w-full btn-primary text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2">
+                            <span>Sincronizar Dados e Travar</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
                         </button>
                     </div>
 
-                    <div id="lockedMessage" class="hidden mt-6 p-6 bg-slate-900 rounded-[24px] text-white text-center animate-in zoom-in duration-500 shadow-2xl">
-                        <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17 4 12"></path></svg>
-                        </div>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-1">Criptografado Localmente</p>
-                        <p class="text-sm font-medium mb-4">Esta venda está protegida contra alterações externas.</p>
-                        <div class="grid grid-cols-1 gap-2">
-                            <button onclick="window.print()" class="w-full text-xs bg-indigo-600 hover:bg-indigo-700 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                    <div id="lockMessage" class="hidden mt-6 p-6 bg-slate-900 rounded-3xl text-white animate-in zoom-in duration-500">
+                        <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Status do Registro</p>
+                        <p class="text-sm font-medium mb-4">Venda bloqueada no banco de dados local. Alterações não são mais permitidas.</p>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="window.print()" class="w-full bg-white/10 hover:bg-white/20 text-xs font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect width="12" height="8" x="6" y="14"></rect></svg>
-                                Imprimir Comprovativo
+                                Imprimir Comprovante
                             </button>
-                            <button onclick="resetarVenda()" class="w-full text-[10px] text-slate-400 hover:text-rose-400 transition-colors py-2 uppercase font-bold">
-                                Criar Nova Venda
+                            <button onclick="resetarSistema()" class="w-full text-[10px] text-slate-500 hover:text-rose-400 font-bold uppercase transition-colors py-2">
+                                Apagar Registro e Nova Venda
                             </button>
                         </div>
                     </div>
                 </div>
             </aside>
 
-            <!-- Acompanhamento -->
-            <main class="lg:col-span-8 space-y-6">
-                <div id="emptyState" class="premium-card rounded-[32px] p-12 text-center flex flex-col items-center justify-center min-h-[500px]">
+            <!-- Main: Painel de Parcelas -->
+            <main class="lg:col-span-8">
+                
+                <!-- Estado Vazio -->
+                <div id="emptyState" class="premium-card rounded-[40px] p-12 text-center flex flex-col items-center justify-center min-h-[550px]">
                     <div class="bg-indigo-50 p-8 rounded-full mb-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
                     </div>
-                    <h3 class="text-2xl font-extrabold text-slate-800 mb-2">Sistema Aguardando</h3>
-                    <p class="text-slate-500 max-w-sm">Configure a venda para ativar o cronograma de quitação irreversível.</p>
+                    <h3 class="text-2xl font-extrabold text-slate-800 mb-2">Aguardando Parâmetros</h3>
+                    <p class="text-slate-500 max-w-sm">Os dados inseridos aqui serão guardados permanentemente neste navegador para acompanhamento do cliente.</p>
                 </div>
 
-                <div id="activeState" class="hidden space-y-6">
-                    <!-- Resumo -->
+                <!-- Painel Ativo -->
+                <div id="activeState" class="hidden space-y-6 animate-in slide-in-from-bottom-6 duration-700">
+                    
+                    <!-- KPIs Financeiros -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="premium-card rounded-3xl p-5 border-l-4 border-indigo-500">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Montante Total</p>
-                            <h4 id="resTotal" class="text-lg font-extrabold text-slate-900">R$ 0,00</h4>
+                        <div class="premium-card rounded-3xl p-6 border-l-4 border-indigo-500">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Valor Total</p>
+                            <h4 id="resTotal" class="text-xl font-black text-slate-900">R$ 0,00</h4>
                         </div>
-                        <div class="premium-card rounded-3xl p-5 border-l-4 border-emerald-500">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Pago</p>
-                            <h4 id="resPago" class="text-lg font-extrabold text-emerald-600">R$ 0,00</h4>
+                        <div class="premium-card rounded-3xl p-6 border-l-4 border-emerald-500">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Recebido</p>
+                            <h4 id="resPago" class="text-xl font-black text-emerald-600">R$ 0,00</h4>
                         </div>
-                        <div class="premium-card rounded-3xl p-5 border-l-4 border-rose-500">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Saldo em Aberto</p>
-                            <h4 id="resPendente" class="text-lg font-extrabold text-rose-600">R$ 0,00</h4>
+                        <div class="premium-card rounded-3xl p-6 border-l-4 border-rose-500">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Pendente</p>
+                            <h4 id="resPendente" class="text-xl font-black text-rose-600">R$ 0,00</h4>
                         </div>
-                        <div class="premium-card rounded-3xl p-5 border-l-4 border-slate-800">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Valor/Parcela</p>
-                            <h4 id="resParcela" class="text-lg font-extrabold text-slate-800">R$ 0,00</h4>
+                        <div class="premium-card rounded-3xl p-6 border-l-4 border-slate-800">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Parcela</p>
+                            <h4 id="resParcela" class="text-xl font-black text-slate-800">R$ 0,00</h4>
                         </div>
                     </div>
 
-                    <!-- Lista -->
-                    <div class="premium-card rounded-[32px] overflow-hidden">
-                        <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white/50">
+                    <!-- Lista de Parcelas -->
+                    <div class="premium-card rounded-[40px] overflow-hidden border border-slate-100">
+                        <div class="px-8 py-6 border-b border-slate-100 bg-white/50 flex justify-between items-center">
                             <div>
-                                <h3 class="text-lg font-bold">Contrato de Pagamentos</h3>
+                                <h3 class="text-lg font-bold">Cronograma de Pagamento</h3>
                                 <p id="vendaDesc" class="text-sm text-slate-500 font-medium"></p>
                             </div>
+                            <div class="no-print">
+                                <span class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase">Link de Acompanhamento</span>
+                            </div>
                         </div>
-                        <div id="listaParcelas" class="divide-y divide-slate-100"></div>
+
+                        <div id="listaParcelas" class="divide-y divide-slate-100 bg-white">
+                            <!-- Injetado via JS -->
+                        </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
 
-    <!-- Toast Feedback -->
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl transition-all opacity-0 pointer-events-none z-50 flex items-center gap-3">
-        <div class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
-        <span id="toastText" class="text-xs font-bold uppercase tracking-widest">Seguro</span>
+    <!-- Toast de Feedback -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-4 rounded-3xl shadow-2xl transition-all translate-y-10 opacity-0 pointer-events-none z-50 flex items-center gap-4">
+        <div class="w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <span id="toastText" class="text-xs font-bold uppercase tracking-widest">Sincronizado</span>
     </div>
 
     <script>
-        // CONFIGURAÇÃO DE SEGURANÇA E PERSISTÊNCIA
-        const STORAGE_KEY = 'JC_SOLUCOES_VENDA_DATA';
+        // CONFIGURAÇÕES DE SEGURANÇA E BANCO DE DADOS LOCAL
+        const DB_KEY = 'JC_SOLUCOES_DB_V1';
 
-        // 1. BLOQUEIO DE TECLAS E CLIQUES
+        // 1. Bloqueio de Atalhos e Inspeção
         document.onkeydown = function(e) {
             if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && e.keyCode == 85)) {
-                console.clear();
                 return false;
             }
         };
 
-        // 2. TRAP DE DEBUGGER (Para travar F12 se aberto)
-        const antiDebug = () => {
-            const start = new Date();
+        // 2. Anti-Debugger (Trava se abrir o DevTools)
+        setInterval(() => {
+            const start = performance.now();
             debugger;
-            const end = new Date();
-            if (end - start > 100) {
-                document.body.innerHTML = "<div style='height:100vh; display:flex; align-items:center; justify-content:center; font-family:sans-serif; color:red;'>Acesso Negado: Ferramentas de Programador Detectadas.</div>";
+            if (performance.now() - start > 100) {
+                document.body.innerHTML = "<div style='height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; background:#000; color:#fff; font-family:sans-serif;'><h1>ACESS_DENIED</h1><p>Sistema de integridade JC Soluções Digitais detectou inspeção.</p></div>";
             }
-        };
-        setInterval(antiDebug, 2000);
+        }, 1000);
 
-        // Estado do Sistema
-        let db = {
+        // 3. Monitor de Integridade do DOM (Impede remoção de 'disabled' via F12)
+        const monitorDOM = new MutationObserver((mutations) => {
+            if (state.travado) {
+                mutations.forEach((m) => {
+                    if (m.type === 'attributes' && m.attributeName === 'disabled') {
+                        if (!m.target.disabled) m.target.disabled = true;
+                    }
+                });
+            }
+        });
+
+        // ESTADO GLOBAL (NOSSO "BANCO DE DADOS" EM MEMÓRIA)
+        let state = {
             titulo: "",
+            produto: "",
             comprador: "",
             valorTotal: 0,
             valorParcela: 0,
@@ -251,42 +278,47 @@
         function showToast(txt) {
             const el = document.getElementById('toast');
             document.getElementById('toastText').innerText = txt;
-            el.classList.replace('opacity-0', 'opacity-100');
-            setTimeout(() => el.classList.replace('opacity-100', 'opacity-0'), 3000);
+            el.classList.remove('opacity-0', 'translate-y-10');
+            el.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                el.classList.add('opacity-0', 'translate-y-10');
+                el.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
         }
 
-        // CARREGAMENTO INICIAL
-        window.onload = function() {
-            const saved = localStorage.getItem(STORAGE_KEY);
+        // CARREGAMENTO INICIAL DO "BANCO"
+        window.onload = () => {
+            const saved = localStorage.getItem(DB_KEY);
             if (saved) {
-                db = JSON.parse(saved);
-                if (db.travado) {
-                    aplicarVisualTravado();
-                    renderUI();
-                    iniciarMonitorizacao();
+                state = JSON.parse(saved);
+                if (state.travado) {
+                    aplicarLockUI();
+                    renderPanel();
                 }
             }
         };
 
-        function salvarLocal() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+        function persistir() {
+            localStorage.setItem(DB_KEY, JSON.stringify(state));
         }
 
-        function gerarVendaLocal() {
+        function gerarEVincular() {
             const tit = document.getElementById('inTitulo').value;
+            const pro = document.getElementById('inProduto').value;
             const val = parseFloat(document.getElementById('inValor').value);
             const qtd = parseInt(document.getElementById('inQtd').value);
             const cli = document.getElementById('inComprador').value;
             const par = parseInt(document.getElementById('inParcelas').value);
 
-            if(!tit || isNaN(val) || !cli) {
-                alert("Dados insuficientes.");
+            if(!tit || !pro || isNaN(val) || !cli) {
+                alert("Por favor, preencha todos os campos obrigatórios para gerar o contrato.");
                 return;
             }
 
             const total = val * qtd;
-            db = {
+            state = {
                 titulo: tit,
+                produto: pro,
                 comprador: cli,
                 valorTotal: total,
                 valorParcela: total / par,
@@ -300,132 +332,132 @@
                 }))
             };
 
-            salvarLocal();
-            aplicarVisualTravado();
-            renderUI();
-            iniciarMonitorizacao();
-            showToast("Venda Blindada!");
+            persistir();
+            aplicarLockUI();
+            renderPanel();
+            showToast("Venda Sincronizada Localmente");
         }
 
-        function aplicarVisualTravado() {
+        function aplicarLockUI() {
             document.getElementById('emptyState').classList.add('hidden');
             document.getElementById('activeState').classList.remove('hidden');
-            document.getElementById('topStats').classList.remove('hidden');
-            document.getElementById('mainForm').classList.add('hidden');
-            document.getElementById('lockedMessage').classList.remove('hidden');
-            document.getElementById('lockStatusIcon').classList.remove('hidden');
-            document.getElementById('configCard').classList.add('venda-travada');
+            document.getElementById('statsHeader').classList.remove('hidden');
+            document.getElementById('formVenda').classList.add('hidden');
+            document.getElementById('lockMessage').classList.remove('hidden');
+            document.getElementById('lockIcon').classList.remove('hidden');
+            document.getElementById('configCard').classList.add('pointer-events-none');
+
+            // Bloquear todos os inputs
+            document.querySelectorAll('#formVenda input, #formVenda select').forEach(el => el.disabled = true);
+            
+            monitorDOM.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['disabled'] });
         }
 
-        function resetarVenda() {
-            if(confirm("Deseja apagar todos os dados e criar um novo contrato?")) {
-                localStorage.removeItem(STORAGE_KEY);
+        function resetarSistema() {
+            if (confirm("ATENÇÃO: Isso apagará todos os dados de cobrança deste navegador. Tem certeza?")) {
+                localStorage.removeItem(DB_KEY);
                 location.reload();
             }
         }
 
-        // MONITORIZAÇÃO DE INTEGRIDADE (Impede F12 de mudar o HTML)
-        function iniciarMonitorizacao() {
-            const target = document.body;
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    // Se alguém tentar mexer nos atributos bloqueados, redesenhamos
-                    if (mutation.type === 'attributes' || mutation.type === 'childList') {
-                        // Verificamos se houve mudança crítica
-                        if(db.travado) {
-                            // Poderíamos fazer um renderUI() aqui, mas para evitar loops, apenas validamos os campos cruciais
-                        }
-                    }
-                });
-            });
-            observer.observe(target, { attributes: true, childList: true, subtree: true });
-        }
-
-        function renderUI() {
+        function renderPanel() {
             const container = document.getElementById('listaParcelas');
             container.innerHTML = '';
 
-            document.getElementById('resTotal').innerText = fmt(db.valorTotal);
-            document.getElementById('resParcela').innerText = fmt(db.valorParcela);
-            document.getElementById('vendaDesc').innerText = `${db.titulo} - ${db.comprador}`;
+            document.getElementById('resTotal').innerText = fmt(state.valorTotal);
+            document.getElementById('resParcela').innerText = fmt(state.valorParcela);
+            document.getElementById('vendaDesc').innerText = `${state.produto} para ${state.comprador}`;
 
             let pagoAcumulado = 0;
 
-            db.parcelas.forEach((p, idx) => {
+            state.parcelas.forEach((p, idx) => {
                 if(p.pago) pagoAcumulado += p.valor;
                 
-                const div = document.createElement('div');
-                div.className = `p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all ${p.pago ? 'parcela-paga bg-slate-50/50' : 'hover:bg-indigo-50/20'}`;
+                const row = document.createElement('div');
+                row.className = `p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all ${p.pago ? 'parcela-paga' : 'hover:bg-slate-50'}`;
                 
-                div.innerHTML = `
+                row.innerHTML = `
                     <div class="flex items-center gap-5">
                         <div class="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-lg shadow-sm border ${p.pago ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white border-slate-200 text-slate-400'}">
                             ${p.id}
                         </div>
                         <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nº Parcela</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Parcela</p>
                             <h5 class="font-extrabold text-slate-800">${fmt(p.valor)}</h5>
                         </div>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-6 no-print">
                         <div class="flex flex-col">
-                            <label class="text-[9px] font-bold text-slate-400 uppercase mb-1">Data Baixa</label>
-                            <input type="date" value="${p.data}" onchange="atualizarCampoParcela(${idx}, 'data', this.value)" 
-                                class="text-xs border border-slate-200 rounded-xl p-2 outline-none" ${p.pago ? 'disabled' : ''}>
+                            <label class="text-[9px] font-bold text-slate-400 uppercase mb-1">Data Pagto</label>
+                            <input type="date" value="${p.data}" onchange="salvarCampo(${idx}, 'data', this.value)" 
+                                class="text-xs bg-white border border-slate-200 rounded-xl p-2 outline-none shadow-sm focus:ring-1 focus:ring-indigo-300" 
+                                ${p.pago ? 'disabled' : ''}>
                         </div>
                         
                         <div class="flex flex-col">
-                            <label class="text-[9px] font-bold text-slate-400 uppercase mb-1">Autenticação</label>
-                            <span class="text-xs font-bold ${p.pago ? 'text-emerald-600' : 'text-amber-500'}">
-                                ${p.pago ? 'Verificada ✓' : 'Pendente'}
-                            </span>
+                            <label class="text-[9px] font-bold text-slate-400 uppercase mb-1">Comprovante</label>
+                            <label class="${p.pago ? 'cursor-default opacity-50' : 'cursor-pointer hover:text-indigo-800'} flex items-center gap-2 text-xs font-semibold text-indigo-600 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                <span class="max-w-[80px] truncate">${p.comprovante ? 'Anexado' : 'Subir'}</span>
+                                <input type="file" class="hidden" onchange="uploadFile(${idx}, this)" ${p.pago ? 'disabled' : ''}>
+                            </label>
                         </div>
 
-                        <button onclick="liquidarParcela(${idx})" 
-                            class="px-5 py-2.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest transition-all
-                            ${p.pago ? 'bg-emerald-600 text-white border-none shadow-lg' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-400 hover:text-indigo-600'}">
-                            ${p.pago ? 'CONCLUÍDO' : 'BAIXAR PARCELA'}
+                        <button onclick="liquidar(${idx})" 
+                            class="px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm
+                            ${p.pago ? 'bg-emerald-100 text-emerald-700' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-400 hover:text-indigo-600'}">
+                            ${p.pago ? '✓ Liquidado' : 'Baixar Parcela'}
                         </button>
                     </div>
 
+                    <!-- Layout para Impressão -->
                     <div class="hidden print:block text-right">
-                        <p class="text-xs font-bold text-slate-800">${p.pago ? 'QUITADO' : 'PENDENTE'}</p>
-                        <p class="text-[10px] text-slate-500">${p.data || '--/--/----'}</p>
+                        <p class="text-xs font-bold ${p.pago ? 'text-emerald-600' : 'text-slate-400'}">${p.pago ? 'PAGO EM: ' + p.data : 'PENDENTE'}</p>
                     </div>
                 `;
-                container.appendChild(div);
+                container.appendChild(row);
             });
 
-            const pendente = db.valorTotal - pagoAcumulado;
+            const pendente = state.valorTotal - pagoAcumulado;
             document.getElementById('resPago').innerText = fmt(pagoAcumulado);
             document.getElementById('resPendente').innerText = fmt(pendente);
             
-            // Gráfico
-            const percent = (pagoAcumulado / db.valorTotal) * 100 || 0;
+            // Gráfico de Progresso
+            const percent = Math.round((pagoAcumulado / state.valorTotal) * 100) || 0;
             const circle = document.getElementById('progressCircle');
             const circumference = 2 * Math.PI * 40;
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
             circle.style.strokeDashoffset = circumference - (percent / 100 * circumference);
-            document.getElementById('totalPercentText').innerText = `${Math.round(percent)}%`;
+            document.getElementById('totalPercentText').innerText = `${percent}%`;
         }
 
-        function atualizarCampoParcela(idx, campo, valor) {
-            // Travamento lógico extra: se o objecto diz que está pago, não altera nada na memória
-            if (db.parcelas[idx].pago) return;
-            db.parcelas[idx][campo] = valor;
-            salvarLocal();
+        function salvarCampo(idx, campo, val) {
+            if (state.parcelas[idx].pago) return;
+            state.parcelas[idx][campo] = val;
+            persistir();
         }
 
-        function liquidarParcela(idx) {
-            if (db.parcelas[idx].pago) return;
-            if (!db.parcelas[idx].data) {
-                alert("Atenção: Data de liquidação é obrigatória para o fechamento.");
+        function uploadFile(idx, input) {
+            if(input.files.length > 0 && !state.parcelas[idx].pago) {
+                state.parcelas[idx].comprovante = input.files[0].name;
+                persistir();
+                renderPanel();
+                showToast("Comprovante Vinculado");
+            }
+        }
+
+        function liquidar(idx) {
+            const p = state.parcelas[idx];
+            if (p.pago) return;
+            if (!p.data) {
+                alert("Por favor, informe a data do pagamento para validar a baixa.");
                 return;
             }
-            db.parcelas[idx].pago = true;
-            salvarLocal();
-            renderUI();
-            showToast("Transação Confirmada!");
+            p.pago = true;
+            persistir();
+            renderPanel();
+            showToast(`Parcela #${p.id} Bloqueada e Paga`);
         }
     </script>
 </body>
