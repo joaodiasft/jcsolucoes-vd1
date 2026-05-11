@@ -1,11 +1,10 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Pencil, Trash2, Plus, DollarSign, Calendar, User, ChevronLeft, Copy, Check, Send } from 'lucide-react'
+import { Pencil, Trash2, Plus, DollarSign, Calendar, User, ChevronLeft, Copy, Check, Send, ArrowLeft, Edit2, Save, X } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
-import { formatCurrency } from '@/lib/utils'
 
 interface Divida {
   id: string
@@ -36,10 +35,12 @@ export default function DividaDetalhes() {
     ativa: true,
   })
   const [copied, setCopied] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
 
-  useEffect(() => {
+  const fetchDivida = () => {
     const id = params.id as string
     if (id) {
+      setLoading(true)
       fetch(`/api/dividas/${id}`)
         .then((res) => res.json())
         .then((data) => {
@@ -58,7 +59,11 @@ export default function DividaDetalhes() {
         })
         .catch(() => setLoading(false))
     }
-  }, [params.id])
+  }
+
+  useEffect(() => {
+    fetchDivida()
+  }, [params.id, refreshKey])
 
   const handleSalvar = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -72,7 +77,8 @@ export default function DividaDetalhes() {
       if (res.ok) {
         toast.success('Dívida atualizada com sucesso!')
         setEditando(false)
-        window.location.reload()
+        setRefreshKey(prev => prev + 1)
+        fetchDivida()
       } else {
         toast.error('Erro ao atualizar')
       }
@@ -142,7 +148,7 @@ Aguardo o comprovante!`
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Carregando...</p>
@@ -153,15 +159,15 @@ Aguardo o comprovante!`
 
   if (!divida) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
-        <div className="text-center max-w-md p-8">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <div className="text-center max-w-md p-8 bg-white rounded-xl shadow-lg">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Dívida não encontrada</h1>
           <p className="text-gray-600 mb-6">A dívida que você procura não existe ou foi removida.</p>
           <Link
             href="/dashboard"
             className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5" />
             Voltar ao Dashboard
           </Link>
         </div>
@@ -174,11 +180,11 @@ Aguardo o comprovante!`
   const progresso = (totalPago / divida.valor_original) * 100
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <Toaster />
       
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -186,7 +192,7 @@ Aguardo o comprovante!`
                 onClick={() => router.push('/dashboard')}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <ChevronLeft className="w-6 h-6 text-gray-600" />
+                <ArrowLeft className="w-6 h-6 text-gray-600" />
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Detalhes da Dívida</h1>
@@ -206,23 +212,33 @@ Aguardo o comprovante!`
                 className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
                 <Send className="w-5 h-5" />
-                Enviar Resumo
+                Enviar
               </button>
               {!editando ? (
                 <button
                   onClick={() => setEditando(true)}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  <Pencil className="w-5 h-5" />
+                  <Edit2 className="w-5 h-5" />
                   Editar
                 </button>
               ) : (
-                <button
-                  onClick={() => setEditando(false)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  Cancelar
-                </button>
+                <>
+                  <button
+                    onClick={() => setEditando(false)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleSalvar}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    <Save className="w-5 h-5" />
+                    Salvar
+                  </button>
+                </>
               )}
               <button
                 onClick={handleExcluir}
