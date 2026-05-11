@@ -1,4 +1,3 @@
-export { hashSenha, verificarSenha, criarTokenSessao, validarTokenSessao } from './auth'
 import { hash, compare } from 'bcryptjs'
 import { SignJWT, jwtVerify } from 'jose'
 

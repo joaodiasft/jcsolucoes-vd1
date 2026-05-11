@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verificarSenha, criarTokenSessao } from '@/lib/auth'
-import { cookies } from 'next/headers'
 
 export async function POST(request: Request) {
   try {
@@ -14,38 +13,50 @@ export async function POST(request: Request) {
       )
     }
 
-    // Busca usuário no banco
+    // Normaliza email
+    const emailNormalizado = email.toLowerCase().trim()
+
+    // Busca usuário no banco (otimizado)
     const usuario = await prisma.usuario.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { email: emailNormalizado },
+      select: {
+        id: true,
+        senha_hash: true,
+      },
     })
 
     if (!usuario) {
+      // Delay para evitar timing attacks
+      await new Promise(resolve => setTimeout(resolve, 100))
       return NextResponse.json(
         { error: 'Email ou senha inválidos' },
         { status: 401 }
       )
     }
 
-    // Verifica senha
+    // Verifica senha (bcrypt é rápido para comparação)
     const senhaValida = await verificarSenha(senha, usuario.senha_hash)
 
     if (!senhaValida) {
+      await new Promise(resolve => setTimeout(resolve, 100))
       return NextResponse.json(
         { error: 'Email ou senha inválidos' },
         { status: 401 }
       )
     }
 
-    // Cria token de sessão
+    // Cria token de sessão (rápido)
     const token = await criarTokenSessao(usuario.id)
 
-    // Define cookie
+    // Cria response com cookie
     const response = NextResponse.json({ success: true })
-    response.cookies.set('session', token, {
+    response.cookies.set({
+      name: 'session',
+      value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lucky',
-      maxAge: 60 * 60 * 24 * 7, // 7 dias
+      maxAge: 604800, // 7 dias em segundos
       path: '/',
     })
 
