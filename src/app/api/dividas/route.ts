@@ -1,8 +1,14 @@
 ﻿import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { validarSessao } from '@/lib/auth'
 
 export async function GET() {
   try {
+    const session = await validarSessao()
+    if (!session) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+
     const dividas = await prisma.divida.findMany({
       include: {
         devedor: true,
@@ -33,6 +39,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const session = await validarSessao()
+    if (!session) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { devedor_id, valor_original, descricao, data_vencimento } = body
 
@@ -42,8 +53,23 @@ export async function POST(request: Request) {
         valor_original,
         descricao: descricao || null,
         data_vencimento: data_vencimento ? new Date(data_vencimento) : null,
+        criado_por: session.usuarioId,
       },
       include: { devedor: true },
+    })
+
+    // Log de auditoria
+    await prisma.auditoria.create({
+      data: {
+        acao: 'CREATE',
+        tabela: 'divida',
+        registro_id: divida.id,
+        dados_novos: {
+          divida: { ...divida, valor_original: Number(divida.valor_original) },
+          devedor_id,
+        } as any,
+        usuario_id: session.usuarioId,
+      },
     })
 
     return NextResponse.json(divida, { status: 201 })

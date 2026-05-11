@@ -1,7 +1,8 @@
-﻿"use client"
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function CadastrarDivida() {
   const router = useRouter()
@@ -11,6 +12,7 @@ export default function CadastrarDivida() {
     telefone: '',
     valor: '',
     descricao: '',
+    data_vencimento: '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,6 +40,7 @@ export default function CadastrarDivida() {
           devedor_id: devedor.id,
           valor_original: parseFloat(formData.valor),
           descricao: formData.descricao || undefined,
+          data_vencimento: formData.data_vencimento || undefined,
         }),
       })
 
@@ -66,12 +69,20 @@ export default function CadastrarDivida() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          Cadastrar Nova Dívida
-        </h1>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-900">Cadastrar Nova Dívida</h1>
+          <Link
+            href="/dashboard"
+            className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Voltar
+          </Link>
+        </div>
+      </header>
 
+      <main className="max-w-2xl mx-auto py-6 px-4">
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-8 space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -128,6 +139,18 @@ export default function CadastrarDivida() {
             />
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Data de Vencimento (opcional)
+            </label>
+            <input
+              type="date"
+              value={formData.data_vencimento}
+              onChange={(e) => setFormData({ ...formData, data_vencimento: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
           <div className="flex gap-4">
             <button
               type="submit"
@@ -145,7 +168,7 @@ export default function CadastrarDivida() {
             </button>
           </div>
         </form>
-      </div>
+      </main>
     </div>
   )
 }

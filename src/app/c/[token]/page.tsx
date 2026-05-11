@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
@@ -27,6 +27,9 @@ export default function DevedorPage() {
   const [data, setData] = useState<DividaData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [pagamentoData, setPagamentoData] = useState('')
+  const [pagamentoValor, setPagamentoValor] = useState('')
 
   useEffect(() => {
     if (!token) return
@@ -46,6 +49,40 @@ export default function DevedorPage() {
         setLoading(false)
       })
   }, [token])
+
+  const handleCopiarPix = () => {
+    const chavePix = 'jcsolucoesgo@gmail.com'
+    navigator.clipboard.writeText(chavePix)
+    alert('Chave PIX copiada!')
+  }
+
+  const handleWhatsApp = () => {
+    const mensagem = `Olá! Sou ${data?.devedor.nome}. Segue meu comprovante de pagamento.`
+    const url = `https://wa.me/5562999999999?text=${encodeURIComponent(mensagem)}`
+    window.open(url, '_blank')
+  }
+
+  const handleConfirmarPagamento = () => {
+    setShowModal(true)
+  }
+
+  const handleEnviarConfirmacao = () => {
+    if (!pagamentoData || !pagamentoValor || !data) {
+      alert('Preencha todos os campos')
+      return
+    }
+
+    const dataFormatada = new Date(pagamentoData).toLocaleDateString('pt-BR')
+    const valorFormatado = Number(pagamentoValor).toFixed(2)
+    
+    const mensagem = `Olá, sou ${data.devedor.nome}.\\n\\nConfirmo o pagamento de R$ ${valorFormatada} realizado em ${dataFormatada}.\\nReferente à dívida: ${data.divida.descricao || data.divida.id}\\n\\nSeguem meus dados:\\n- Nome: ${data.devedor.nome}\\n\\nEm anexo, envio o comprovante.`
+    
+    const url = `https://wa.me/5562999999999?text=${encodeURIComponent(mensagem)}`
+    window.open(url, '_blank')
+    setShowModal(false)
+    setPagamentoData('')
+    setPagamentoValor('')
+  }
 
   if (loading) {
     return (
@@ -67,20 +104,6 @@ export default function DevedorPage() {
         </div>
       </div>
     )
-  }
-
-  const chavePix = process.env.NEXT_PUBLIC_CHAVE_PIX || 'jcsolucoesgo@gmail.com'
-  const whatsappNumero = process.env.NEXT_PUBLIC_WHATSAPP_NUMERO || '5562999999999'
-
-  const handleCopiarPix = () => {
-    navigator.clipboard.writeText(chavePix)
-    alert('Chave PIX copiada!')
-  }
-
-  const handleWhatsApp = () => {
-    const mensagem = `Olá! Sou ${data.devedor.nome}. Segue meu comprovante de pagamento.`
-    const url = `https://wa.me/${whatsappNumero}?text=${encodeURIComponent(mensagem)}`
-    window.open(url, '_blank')
   }
 
   return (
@@ -123,8 +146,14 @@ export default function DevedorPage() {
               Copiar Chave PIX
             </button>
             <button
-              onClick={handleWhatsApp}
+              onClick={handleConfirmarPagamento}
               className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Confirmar Pagamento
+            </button>
+            <button
+              onClick={handleWhatsApp}
+              className="w-full bg-gray-600 text-white py-3 px-6 rounded-lg hover:bg-gray-700 transition-colors"
             >
               Enviar Comprovante
             </button>
@@ -154,6 +183,58 @@ export default function DevedorPage() {
           )}
         </div>
       </div>
+
+      {/* Modal de Confirmação */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Confirmar Pagamento</h2>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Data do Pagamento
+                </label>
+                <input
+                  type="date"
+                  value={pagamentoData}
+                  onChange={(e) => setPagamentoData(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Valor Pago (R$)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={pagamentoValor}
+                  onChange={(e) => setPagamentoValor(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleEnviarConfirmacao}
+                className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700"
+              >
+                Enviar Comprovante
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

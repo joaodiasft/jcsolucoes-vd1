@@ -7,6 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Usuario {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  senha_hash   String
+  criado_em    DateTime  @default(now())
+  auditorias   Auditoria[]
+
+  @@map("usuarios")
+}
+
 model Devedor {
   id           String    @id @default(uuid())
   nome         String
@@ -53,4 +63,18 @@ model Pagamento {
   divida         Divida   @relation(fields: [divida_id], references: [id], onDelete: Cascade)
 
   @@map("pagamentos")
+}
+
+model Auditoria {
+  id          String   @id @default(uuid())
+  usuario_id  String?
+  acao        String
+  entidade    String
+  entidade_id String?
+  dados_antigos String?
+  dados_novos   String?
+  criado_em   DateTime @default(now())
+  usuario     Usuario?  @relation(fields: [usuario_id], references: [id], onDelete: SetNull)
+
+  @@map("auditoria")
 }

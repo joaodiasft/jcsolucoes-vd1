@@ -1,7 +1,8 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 interface Divida {
   id: string
@@ -14,6 +15,7 @@ interface Divida {
 }
 
 export default function Dashboard() {
+  const router = useRouter()
   const [dividas, setDividas] = useState<Divida[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -27,6 +29,11 @@ export default function Dashboard() {
       .catch(() => setLoading(false))
   }, [])
 
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    router.push('/login')
+  }
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Carregando...</div>
   }
@@ -34,24 +41,31 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Dashboard - JC Soluções
-          </h1>
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Dashboard - JC Soluções
+            </h1>
+          </div>
+          <div className="flex gap-4">
+            <Link
+              href="/dividas/cadastrar"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Nova Dívida
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-4 sm:px-0">
-          <div className="mb-6">
-            <Link
-              href="/dashboard/cadastrar"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Nova Dívida
-            </Link>
-          </div>
-
           {dividas.length === 0 ? (
             <p className="text-gray-500">Nenhuma dívida cadastrada.</p>
           ) : (

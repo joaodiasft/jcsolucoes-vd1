@@ -1,11 +1,39 @@
-﻿export default function AdminLayout({
-  children,
+﻿import Link from 'next/link'
+
+export default function AdminLayout({
+ children,
 }: {
-  children: React.ReactNode
+ children: React.ReactNode
 }) {
-  return (
-    <div>
-      {children}
-    </div>
-  )
+ return (
+   <div>
+     <nav className="bg-white shadow-sm border-b">
+       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+         <div className="flex justify-between h-16">
+           <div className="flex items-center space-x-4">
+             <Link
+               href="/dashboard"
+               className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+             >
+               Dashboard
+             </Link>
+             <Link
+               href="/dashboard/cadastrar"
+               className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+             >
+               Nova Dívida
+             </Link>
+             <Link
+               href="/relatorios"
+               className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+             >
+               Relatórios
+             </Link>
+           </div>
+         </div>
+       </div>
+     </nav>
+     {children}
+   </div>
+ )
 }

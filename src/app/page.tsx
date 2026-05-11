@@ -1,4 +1,4 @@
-﻿import Link from 'next/link'
+import { NextResponse } from 'next/server'
 
 export default function Home() {
   return (
@@ -11,12 +11,12 @@ export default function Home() {
           Sistema de Gestão de Dívidas
         </p>
         <div className="space-y-4">
-          <Link
+          <a
             href="/dashboard"
             className="block w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Área Administrativa
-          </Link>
+          </a>
         </div>
       </div>
     </main>
