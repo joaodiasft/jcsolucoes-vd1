@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -180,7 +180,7 @@ export default function Dashboard() {
                         {divida.descricao && <p className="text-sm text-gray-600 mb-2 truncate">{divida.descricao}</p>}
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <span className="flex items-center gap-1"><Check className="w-4 h-4 text-green-600" />Pago: R$ {divida.total_pago.toFixed(2)}</span>
-                          <span>�</span>
+                          <span>•</span>
                           <span className="flex items-center gap-1"><DollarSign className="w-4 h-4 text-red-600" />Restante: R$ {divida.saldo_devedor.toFixed(2)}</span>
                         </div>
                         <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
@@ -193,10 +193,10 @@ export default function Dashboard() {
                         <p className="text-sm text-gray-500">{new Date(divida.createdAt).toLocaleDateString('pt-BR')}</p>
                       </div>
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={(e) => { e.stopPropagation(); router.push(`/dividas/${divida.id}`; }} className="p-2 hover:bg-blue-100 rounded-lg transition-colors" title="Ver detalhes"><Eye className="w-5 h-5 text-blue-600" /></button>
+                        <button onClick={(e) => { e.stopPropagation(); window.location.href = `/dividas/${divida.id}`; }} className="p-2 hover:bg-blue-100 rounded-lg transition-colors" title="Ver detalhes"><Eye className="w-5 h-5 text-blue-600" /></button>
                         <button onClick={(e) => { e.stopPropagation(); handleCopiarLink(divida.id); }} className="p-2 hover:bg-green-100 rounded-lg transition-colors" title="Copiar link">{copiedId === divida.id ? <Check className="w-5 h-5 text-green-600" /> : <Copy className="w-5 h-5 text-green-600" />}</button>
                         <a href={`/c/${divida.id}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="p-2 hover:bg-purple-100 rounded-lg transition-colors" title="Ver como devedor"><ExternalLink className="w-5 h-5 text-purple-600" /></a>
-                        <button onClick={(e) => { e.stopPropagation(); router.push(`/dividas/${divida.id}`; }} className="p-2 hover:bg-orange-100 rounded-lg transition-colors" title="Editar"><Edit2 className="w-5 h-5 text-orange-600" /></button>
+                        <button onClick={(e) => { e.stopPropagation(); window.location.href = `/dividas/${divida.id}`; }} className="p-2 hover:bg-orange-100 rounded-lg transition-colors" title="Editar"><Edit2 className="w-5 h-5 text-orange-600" /></button>
                         <button onClick={(e) => { e.stopPropagation(); if (confirm('Tem certeza que deseja excluir?')) { fetch(`/api/dividas/${divida.id}`, { method: 'DELETE' }).then(() => window.location.reload()); }} } className="p-2 hover:bg-red-100 rounded-lg transition-colors" title="Excluir"><Trash2 className="w-5 h-5 text-red-600" /></button>
                       </div>
                     </div>
