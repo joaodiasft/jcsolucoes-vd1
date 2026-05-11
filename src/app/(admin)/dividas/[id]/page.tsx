@@ -9,13 +9,13 @@ import toast, { Toaster } from 'react-hot-toast'
 interface Divida {
   id: string
   devedor: { id: string; nome: string; telefone?: string }
-  valor_original: number
+  valor_original: number | string
   descricao?: string
   data_vencimento?: string
   ativa: boolean
   pagamentos: Array<{
     id: string
-    valor: number
+    valor: number | string
     data_pagamento: string
   }>
 }
@@ -111,9 +111,9 @@ export default function DividaDetalhes() {
     
     const texto = `
 Dívida: ${divida.devedor.nome}
-Valor: R$ ${divida.valor_original.toFixed(2)}
+Valor: R$ ${Number(divida.valor_original).toFixed(2)}
 Pago: R$ ${divida.pagamentos.reduce((acc, p) => acc + Number(p.valor), 0).toFixed(2)}
-Restante: R$ ${(divida.valor_original - divida.pagamentos.reduce((acc, p) => acc + Number(p.valor), 0)).toFixed(2)}
+Restante: R$ ${(Number(divida.valor_original) - divida.pagamentos.reduce((acc, p) => acc + Number(p.valor), 0)).toFixed(2)}
     `.trim()
     
     navigator.clipboard.writeText(texto)
@@ -126,13 +126,13 @@ Restante: R$ ${(divida.valor_original - divida.pagamentos.reduce((acc, p) => acc
     if (!divida) return
     
     const totalPago = divida.pagamentos.reduce((acc, p) => acc + Number(p.valor), 0)
-    const restante = divida.valor_original - totalPago
+    const restante = Number(divida.valor_original) - totalPago
     
     const mensagem = `Olá, ${divida.devedor.nome}!
 
 Segue resumo da sua dívida:
 
-💰 Valor Total: R$ ${divida.valor_original.toFixed(2)}
+💰 Valor Total: R$ ${Number(divida.valor_original).toFixed(2)}
 ✅ Já Pago: R$ ${totalPago.toFixed(2)}
 📊 Restante: R$ ${restante.toFixed(2)}
 
@@ -176,8 +176,8 @@ Aguardo o comprovante!`
   }
 
   const totalPago = divida.pagamentos.reduce((acc, p) => acc + Number(p.valor), 0)
-  const restante = divida.valor_original - totalPago
-  const progresso = (totalPago / divida.valor_original) * 100
+  const restante = Number(divida.valor_original) - totalPago
+  const progresso = (totalPago / Number(divida.valor_original)) * 100
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -333,7 +333,7 @@ Aguardo o comprovante!`
                     <DollarSign className="w-5 h-5 text-blue-500" />
                     <span className="text-sm font-medium text-gray-600">Valor Total</span>
                   </div>
-                  <p className="text-2xl font-bold text-gray-900">R$ {divida.valor_original.toFixed(2)}</p>
+                  <p className="text-2xl font-bold text-gray-900">R$ {Number(divida.valor_original).toFixed(2)}</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
                   <div className="flex items-center gap-3 mb-2">
