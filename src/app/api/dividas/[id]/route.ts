@@ -1,13 +1,15 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+    
     const divida = await prisma.divida.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         devedor: true,
         pagamentos: true,
@@ -27,15 +29,15 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const { nome, telefone, valor_original, descricao, data_vencimento, ativa } = body
 
-    // Atualiza devedor
     const dividaAtual = await prisma.divida.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { devedor: true },
     })
 
@@ -51,9 +53,8 @@ export async function PUT(
       },
     })
 
-    // Atualiza dívida
     const divida = await prisma.divida.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         valor_original: parseFloat(valor_original),
         descricao: descricao || null,
@@ -72,11 +73,13 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+    
     await prisma.divida.delete({
-      where: { id: params.id },
+      where: { id },
     })
 
     return NextResponse.json({ success: true })
