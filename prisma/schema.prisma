@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Devedor {
+  id           String    @id @default(uuid())
+  nome         String
+  telefone     String?
+  criado_em    DateTime  @default(now())
+  dividas      Divida[]
+  tokens       TokenAcesso[]
+
+  @@map("devedores")
+}
+
+model Divida {
+  id               String      @id @default(uuid())
+  devedor_id       String
+  valor_original   Decimal     @db.Decimal(10, 2)
+  descricao        String?
+  data_vencimento  DateTime?
+  ativa            Boolean     @default(true)
+  criado_em        DateTime    @default(now())
+  devedor          Devedor     @relation(fields: [devedor_id], references: [id], onDelete: Cascade)
+  pagamentos       Pagamento[]
+
+  @@map("dividas")
+}
+
+model TokenAcesso {
+  id          String   @id @default(uuid())
+  devedor_id  String
+  token_hash  String   @unique
+  expira_em   DateTime
+  usado       Boolean  @default(false)
+  criado_em   DateTime @default(now())
+  devedor     Devedor  @relation(fields: [devedor_id], references: [id], onDelete: Cascade)
+
+  @@map("tokens_acesso")
+}
+
+model Pagamento {
+  id             String   @id @default(uuid())
+  divida_id      String
+  valor          Decimal  @db.Decimal(10, 2)
+  data_pagamento DateTime
+  criado_em      DateTime @default(now())
+  divida         Divida   @relation(fields: [divida_id], references: [id], onDelete: Cascade)
+
+  @@map("pagamentos")
+}
