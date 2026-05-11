@@ -1,19 +1,19 @@
-Ôªøimport { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { validarSessao } from '@/lib/auth'
+import { validarTokenSessao } from '@/lib/auth'
 
 export async function POST(request: Request) {
   try {
-    const session = await validarSessao()
+    const session = await validarTokenSessao()
     if (!session) {
-      return NextResponse.json({ error: 'N√£o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'N„o autorizado' }, { status: 401 })
     }
 
     const { divida_id, valor, data_pagamento } = await request.json()
 
     if (!divida_id || !valor) {
       return NextResponse.json(
-        { error: 'divida_id e valor s√£o obrigat√≥rios' },
+        { error: 'divida_id e valor s„o obrigatÛrios' },
         { status: 400 }
       )
     }

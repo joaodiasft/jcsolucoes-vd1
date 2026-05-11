@@ -1,4 +1,4 @@
-import { hash, compare } from 'bcryptjs'
+﻿import { hash, compare } from 'bcryptjs'
 import { SignJWT, jwtVerify } from 'jose'
 
 const secret = new TextEncoder().encode(
@@ -31,3 +31,6 @@ export async function validarTokenSessao(token: string): Promise<{ usuarioId: st
     return null
   }
 }
+
+// Alias para compatibilidade
+export const validarSessao = validarTokenSessao
