@@ -124,14 +124,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     await JCPag.init();
-    const ctx = await JCPag.obterContextoCliente();
-    if (!ctx) {
+    const cliente = await JCPag.getClienteLogado();
+    if (!cliente) {
       window.location.replace("index.html");
       return;
     }
 
-    setupHeader(ctx.cliente.nome);
-    await renderDashboard(ctx.cliente);
+    setupHeader(cliente.nome);
+    await renderDashboard(cliente);
   } catch (e) {
     console.error("[ClienteApp]", e);
     setupHeader("Cliente");

@@ -153,10 +153,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   let sessao;
   try {
     await JCPag.init();
-    sessao = await JCPag.validarSessaoAtiva();
-    if (!sessao || sessao.role !== "admin") {
-      window.location.replace("index.html");
-      return;
+    if (typeof JCPag.validarSessaoAtiva === "function") {
+      sessao = await JCPag.validarSessaoAtiva();
+      if (!sessao || sessao.role !== "admin") {
+        window.location.replace("index.html");
+        return;
+      }
+    } else {
+      sessao = await JCPag.guard.exigirAdmin();
+      if (!sessao) return;
     }
   } catch (e) {
     alert(e.message);

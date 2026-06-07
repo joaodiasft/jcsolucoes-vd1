@@ -6,13 +6,17 @@
 document.addEventListener("DOMContentLoaded", async function () {
   try {
     await JCPag.init();
-    const sessao = await JCPag.validarSessaoAtiva();
-    if (sessao?.role === "admin") {
-      window.location.replace(JCPag.guard.ROUTES.admin);
-      return;
-    }
-    if (sessao?.role === "cliente") {
-      window.location.replace(JCPag.guard.ROUTES.cliente);
+    if (typeof JCPag.validarSessaoAtiva === "function") {
+      const sessao = await JCPag.validarSessaoAtiva();
+      if (sessao?.role === "admin") {
+        window.location.replace(JCPag.guard.ROUTES.admin);
+        return;
+      }
+      if (sessao?.role === "cliente") {
+        window.location.replace(JCPag.guard.ROUTES.cliente);
+        return;
+      }
+    } else if (await JCPag.guard.redirecionarSeLogado()) {
       return;
     }
   } catch (e) {
