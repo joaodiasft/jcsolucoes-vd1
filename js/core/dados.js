@@ -151,9 +151,9 @@ window.JCPag = (function () {
   }
 
   function statusLabel(status) {
-    if (status === "pago") return { texto: "Pago", cls: "bg-emerald-100 text-emerald-700" };
-    if (status === "atrasado") return { texto: "Atrasado", cls: "bg-rose-100 text-rose-700" };
-    return { texto: "Pendente", cls: "bg-amber-100 text-amber-700" };
+    if (status === "pago") return { texto: "Pago", cls: "jcpag-badge jcpag-badge--ok" };
+    if (status === "atrasado") return { texto: "Atrasado", cls: "jcpag-badge jcpag-badge--danger" };
+    return { texto: "Pendente", cls: "jcpag-badge jcpag-badge--warn" };
   }
 
   async function gerarTokenCliente() {

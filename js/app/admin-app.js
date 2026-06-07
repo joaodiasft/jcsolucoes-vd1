@@ -21,19 +21,19 @@ function renderClientes() {
   const clientes = JCPag.dados.clientes;
 
   if (!clientes.length) {
-    tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">Nenhum cliente cadastrado.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="jcpag-empty">Nenhum cliente cadastrado.</td></tr>';
     return;
   }
 
   tbody.innerHTML = clientes
     .map((c) => {
       const qtd = JCPag.contratosDoCliente(c.id).length;
-      return `<tr class="border-b border-slate-50 last:border-0">
-        <td class="py-4 font-bold text-slate-900">${c.nome}</td>
-        <td class="py-4 text-slate-500">${c.email}<br><span class="text-xs">${c.telefone || "—"}</span></td>
-        <td class="py-4"><code class="px-2 py-1 bg-slate-100 rounded-lg text-xs font-bold" title="Token mascarado">${c.tokenPreview}</code></td>
-        <td class="py-4 text-center font-bold">${qtd}</td>
-        <td class="py-4"><button type="button" data-editar="${c.id}" class="text-indigo-600 font-bold text-xs hover:underline">Editar</button></td>
+      return `<tr>
+        <td class="font-bold">${c.nome}</td>
+        <td class="text-slate-500">${c.email}<br><span class="text-xs">${c.telefone || "—"}</span></td>
+        <td><code class="px-2 py-1 bg-slate-100 rounded-lg text-xs font-bold">${c.tokenPreview}</code></td>
+        <td class="text-center font-bold">${qtd}</td>
+        <td><button type="button" data-editar="${c.id}" class="jcpag-link-action">Editar</button></td>
       </tr>`;
     })
     .join("");
@@ -48,7 +48,7 @@ function renderFinanceiro() {
   const parcelas = [...JCPag.dados.parcelas].sort((a, b) => a.vencimento.localeCompare(b.vencimento));
 
   if (!parcelas.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-slate-400">Nenhuma movimentação.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="jcpag-empty">Nenhuma movimentação.</td></tr>';
     return;
   }
 
@@ -59,17 +59,17 @@ function renderFinanceiro() {
       const st = JCPag.statusLabel(p.status);
       const btn =
         p.status !== "pago"
-          ? `<button type="button" data-pagar="${p.id}" class="text-emerald-600 font-bold text-xs hover:underline">Marcar pago</button>`
+          ? `<button type="button" data-pagar="${p.id}" class="jcpag-link-action">Marcar pago</button>`
           : '<span class="text-slate-300 text-xs">—</span>';
 
-      return `<tr class="border-b border-slate-50">
-        <td class="py-4">${cliente ? cliente.nome : "—"}</td>
-        <td class="py-4">${contrato ? contrato.servico : "—"}</td>
-        <td class="py-4">${p.numero}x</td>
-        <td class="py-4">${JCPag.formatarData(p.vencimento)}</td>
-        <td class="py-4 text-right font-bold">${JCPag.formatarMoeda(p.valor)}</td>
-        <td class="py-4 text-center"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${st.cls}">${st.texto}</span></td>
-        <td class="py-4 text-center">${btn}</td>
+      return `<tr>
+        <td>${cliente ? cliente.nome : "—"}</td>
+        <td>${contrato ? contrato.servico : "—"}</td>
+        <td>${p.numero}x</td>
+        <td>${JCPag.formatarData(p.vencimento)}</td>
+        <td class="text-right font-bold">${JCPag.formatarMoeda(p.valor)}</td>
+        <td class="text-center"><span class="${st.cls}">${st.texto}</span></td>
+        <td class="text-center">${btn}</td>
       </tr>`;
     })
     .join("");
@@ -92,7 +92,7 @@ function renderLogs() {
   const logs = JCPag.dados.logs || [];
 
   if (!logs.length) {
-    tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-slate-400">Nenhuma ação registrada.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" class="jcpag-empty">Nenhuma ação registrada.</td></tr>';
     return;
   }
 
@@ -100,15 +100,15 @@ function renderLogs() {
     .map((log) => {
       const badgeCls =
         log.tipoAutor === "admin"
-          ? "bg-indigo-100 text-indigo-700"
+          ? "jcpag-badge jcpag-badge--admin"
           : log.tipoAutor === "cliente"
-            ? "bg-emerald-100 text-emerald-700"
-            : "bg-slate-100 text-slate-600";
-      return `<tr class="border-b border-slate-50 last:border-0">
-        <td class="py-3 pr-4 text-slate-500 whitespace-nowrap">${JCPag.formatarDataHora(log.data)}</td>
-        <td class="py-3 pr-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${badgeCls}">${log.autor}</span></td>
-        <td class="py-3 pr-4 font-bold text-slate-800">${log.acao}</td>
-        <td class="py-3 text-slate-500">${log.detalhes || "—"}</td>
+            ? "jcpag-badge jcpag-badge--ok"
+            : "jcpag-badge";
+      return `<tr>
+        <td class="text-slate-500 whitespace-nowrap">${JCPag.formatarDataHora(log.data)}</td>
+        <td><span class="${badgeCls}">${log.autor}</span></td>
+        <td class="font-bold">${log.acao}</td>
+        <td class="text-slate-500">${log.detalhes || "—"}</td>
       </tr>`;
     })
     .join("");

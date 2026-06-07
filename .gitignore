@@ -1,4 +1,5 @@
-# Arquivos locais com segredos — NÃO commitar se alterados
+# Arquivos locais com segredos — NÃO commitar se contiver valores reais
+# config.local.js (stub vazio) pode ser commitado; regenere com 1Password localmente
 .env
 .env.*
 *.local

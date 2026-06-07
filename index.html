@@ -5,51 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>JC Soluções - Entrar</title>
+  <title>JC Soluções — Entrar</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc;
-      background-image: radial-gradient(at 0% 0%, rgba(99,102,241,.1) 0, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(16,185,129,.1) 0, transparent 50%); }
-    .glass { background: rgba(255,255,255,.8); backdrop-filter: blur(20px); }
-  </style>
+  <link rel="stylesheet" href="css/jcpag-theme.css?v=6">
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="jcpag-body">
 
-  <div class="glass w-full max-w-md rounded-3xl shadow-2xl border border-white/50 p-8 space-y-8">
-    <div class="text-center">
-      <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
-        <i class="ph-fill ph-fingerprint text-white text-3xl"></i>
+  <div class="jcpag-login-wrap">
+    <aside class="jcpag-login-brand jcpag-animate hidden md:flex">
+      <div class="jcpag-brand-badge">
+        <i class="ph-fill ph-vault text-2xl text-white"></i>
       </div>
-      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">JC Soluções</h1>
-      <p class="text-slate-500 text-sm font-medium mt-1">Digite seu token de acesso</p>
+      <div class="jcpag-brand-line"></div>
+      <h1 class="jcpag-brand-title">JC Soluções</h1>
+      <p class="jcpag-brand-sub">Portal seguro de pagamentos e gestão de contratos. Acesso exclusivo por token.</p>
+      <p class="mt-auto text-xs text-white/40 pt-8">Dados criptografados · Sessão assinada</p>
+    </aside>
+
+    <div class="jcpag-login-panel">
+      <div class="jcpag-card jcpag-animate jcpag-animate-d1">
+        <div class="text-center mb-8 md:hidden">
+          <div class="jcpag-brand-badge mx-auto mb-4">
+            <i class="ph-fill ph-vault text-2xl text-white"></i>
+          </div>
+          <h1 class="jcpag-display text-2xl font-extrabold">JC Soluções</h1>
+        </div>
+
+        <div class="hidden md:block mb-8">
+          <h2 class="jcpag-display text-xl font-bold">Entrar</h2>
+          <p class="text-sm text-slate-500 mt-1">Digite seu token de acesso</p>
+        </div>
+        <p class="md:hidden text-center text-sm text-slate-500 mb-6">Digite seu token de acesso</p>
+
+        <form id="login-form" class="space-y-5" autocomplete="off">
+          <div>
+            <label class="jcpag-label" for="token">Token</label>
+            <input required type="password" id="token" maxlength="64" autocomplete="off"
+              class="jcpag-input text-center tracking-widest" placeholder="••••••••">
+          </div>
+          <p id="login-erro" class="jcpag-erro hidden"></p>
+          <button type="submit" id="btn-login" class="jcpag-btn-primary">
+            <span id="btn-text">Entrar</span>
+          </button>
+        </form>
+
+        <p class="text-center text-xs text-slate-400 mt-6">Problemas no acesso? Entre em contato com a JC Soluções.</p>
+      </div>
     </div>
-
-    <form id="login-form" class="space-y-6" autocomplete="off">
-      <div class="space-y-2">
-        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Token</label>
-        <input required type="password" id="token" maxlength="64" autocomplete="off"
-          class="w-full px-4 py-4 rounded-2xl border border-slate-200 bg-white/60 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium text-base text-center text-slate-700"
-          placeholder="••••••••">
-      </div>
-      <p id="login-erro" class="hidden text-sm font-semibold text-rose-600 text-center"></p>
-      <button type="submit" id="btn-login" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all">
-        <span id="btn-text">Entrar</span>
-      </button>
-    </form>
-
-    <p class="text-center text-[10px] text-slate-400">Problemas no acesso? Entre em contato com a JC Soluções.</p>
   </div>
 
-  <script src="config.example.js?v=5"></script>
-  <script src="config.local.js?v=5"></script>
-  <script src="js/security/crypto.js?v=5"></script>
-  <script src="js/security/auth.js?v=5"></script>
-  <script src="js/security/guard.js?v=5"></script>
-  <script src="js/core/store.js?v=5"></script>
-  <script src="js/core/dados.js?v=5"></script>
-  <script src="js/app/login.js?v=5"></script>
+  <script src="config.example.js?v=6"></script>
+  <script src="config.local.js?v=6"></script>
+  <script src="js/security/crypto.js?v=6"></script>
+  <script src="js/security/auth.js?v=6"></script>
+  <script src="js/security/guard.js?v=6"></script>
+  <script src="js/core/store.js?v=6"></script>
+  <script src="js/core/dados.js?v=6"></script>
+  <script src="js/app/login.js?v=6"></script>
 </body>
 </html>

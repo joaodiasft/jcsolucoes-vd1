@@ -27,9 +27,9 @@ function setupHeader(nome) {
 
 function renderEstadoCarregando() {
   document.getElementById("contracts-table-body").innerHTML =
-    '<tr><td colspan="4" class="py-6 text-center text-slate-400">Carregando contratos…</td></tr>';
+    '<tr><td colspan="4" class="jcpag-empty">Carregando contratos…</td></tr>';
   document.getElementById("payments-table-body").innerHTML =
-    '<tr><td colspan="5" class="py-6 text-center text-slate-400">Carregando faturas…</td></tr>';
+    '<tr><td colspan="5" class="jcpag-empty">Carregando faturas…</td></tr>';
 }
 
 async function renderDashboard(cliente) {
@@ -53,26 +53,26 @@ async function renderDashboard(cliente) {
 
   const statusEl = document.getElementById("dash-status");
   statusEl.textContent = temAtraso ? "Inadimplente" : contratos.length ? "Ativo" : "Sem contrato";
-  statusEl.className = "text-2xl font-extrabold mt-1 " + (temAtraso ? "text-rose-600" : "text-emerald-600");
+  statusEl.className = "jcpag-kpi-value text-lg " + (temAtraso ? "text-rose-600" : "text-emerald-600");
 
   const tbodyContratos = document.getElementById("contracts-table-body");
   tbodyContratos.innerHTML = contratos.length
     ? contratos
         .map(
-          (c) => `<tr class="border-b border-slate-50 last:border-0">
-        <td class="py-4 font-bold text-slate-900">${c.servico}</td>
-        <td class="py-4 text-slate-500">${JCPag.formatarData(c.dataInicio)}</td>
-        <td class="py-4 text-right font-bold">${JCPag.formatarMoeda(c.valorTotal)}</td>
-        <td class="py-4 text-center"><span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase">${c.status}</span></td>
+          (c) => `<tr>
+        <td class="font-bold">${c.servico}</td>
+        <td class="text-slate-500">${JCPag.formatarData(c.dataInicio)}</td>
+        <td class="text-right font-bold">${JCPag.formatarMoeda(c.valorTotal)}</td>
+        <td class="text-center"><span class="jcpag-badge jcpag-badge--ok">${c.status}</span></td>
       </tr>`,
         )
         .join("")
-    : '<tr><td colspan="4" class="py-6 text-center text-slate-400">Nenhum contrato vinculado à sua conta.</td></tr>';
+    : '<tr><td colspan="4" class="jcpag-empty">Nenhum contrato vinculado à sua conta.</td></tr>';
 
   const tbodyPag = document.getElementById("payments-table-body");
   if (!parcelas.length) {
     tbodyPag.innerHTML =
-      '<tr><td colspan="5" class="py-6 text-center text-slate-400">Nenhuma fatura disponível no momento.</td></tr>';
+      '<tr><td colspan="5" class="jcpag-empty">Nenhuma fatura disponível no momento.</td></tr>';
     return;
   }
 
@@ -82,15 +82,15 @@ async function renderDashboard(cliente) {
       const st = JCPag.statusLabel(p.status);
       const acao =
         p.status !== "pago"
-          ? `<button type="button" data-pix="${p.id}" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase hover:bg-indigo-700">Pagar Pix</button>`
-          : '<span class="text-slate-300 text-xs italic">Comprovante OK</span>';
+          ? `<button type="button" data-pix="${p.id}" class="jcpag-btn-primary jcpag-btn-teal !w-auto !py-1.5 !px-3 text-[10px] uppercase">Pagar Pix</button>`
+          : '<span class="text-slate-300 text-xs italic">Pago</span>';
 
-      return `<tr class="border-b border-slate-50 last:border-0">
-        <td class="py-4 text-slate-600">${p.numero}ª parcela</td>
-        <td class="py-4 text-slate-600">${JCPag.formatarData(p.vencimento)}</td>
-        <td class="py-4 text-right font-bold text-slate-900">${JCPag.formatarMoeda(p.valor)}</td>
-        <td class="py-4 text-center"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${st.cls}">${st.texto}</span></td>
-        <td class="py-4 text-center">${acao}</td>
+      return `<tr>
+        <td>${p.numero}ª parcela</td>
+        <td>${JCPag.formatarData(p.vencimento)}</td>
+        <td class="text-right font-bold">${JCPag.formatarMoeda(p.valor)}</td>
+        <td class="text-center"><span class="${st.cls}">${st.texto}</span></td>
+        <td class="text-center">${acao}</td>
       </tr>`;
     })
     .join("");
