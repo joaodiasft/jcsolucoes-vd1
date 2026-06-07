@@ -20,6 +20,9 @@ window.JCPAG_CONFIG = {
   /** Hash SHA-256 do token admin — gere com scripts/hash-token.js */
   ADMIN_TOKEN_HASH: "b92b94c0760e76250b8bce74b4118aff2e9d4fa1bfb65f6588789f88c8214670",
 
+  /** Tempo máximo de inatividade no painel de gestão (minutos) */
+  ADMIN_IDLE_MINUTES: 5,
+
   /** Dados Pix exibidos ao cliente */
   PIX: {
     tipo: "E-mail",

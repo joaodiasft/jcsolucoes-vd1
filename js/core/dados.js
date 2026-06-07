@@ -187,13 +187,14 @@ window.JCPag = (function () {
     return { ok: false, erro: "Token inválido ou expirado." };
   }
 
-  async function logout() {
+  async function logout(detalhes) {
     const sessao = await JCPagAuth.validarSessao();
+    const msg = detalhes || "Painel administrativo";
     if (sessao?.role === "admin") {
-      await registrarLog("Logout", "Painel administrativo", getAutorAdmin());
+      await registrarLog("Logout", msg, getAutorAdmin());
     } else if (sessao?.role === "cliente") {
       const c = getCliente(sessao.clienteId);
-      if (c) await registrarLog("Logout", "Portal do cliente", { nome: c.nome, tipo: "cliente" });
+      if (c) await registrarLog("Logout", detalhes || "Portal do cliente", { nome: c.nome, tipo: "cliente" });
     }
     JCPagAuth.destruirSessao();
     window.location.href = JCPagGuard.ROUTES.login;

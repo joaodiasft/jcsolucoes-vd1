@@ -23,17 +23,31 @@
       </div>
       <h1 class="font-extrabold text-xl tracking-tight">JC Soluções <span class="text-slate-400 font-medium text-sm ml-2">Gestão</span></h1>
     </div>
-    <div class="flex items-center gap-3">
-      <button id="btn-novo-cliente" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
-        <i class="ph-bold ph-user-plus"></i> Cliente
+    <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+      <button id="btn-novo-cliente" type="button" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 sm:px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+        <i class="ph-bold ph-user-plus"></i><span class="hidden sm:inline">Cliente</span>
       </button>
-      <button id="btn-nova-venda" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/20">
-        <i class="ph-bold ph-plus"></i> Nova venda
+      <button id="btn-nova-venda" type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/20">
+        <i class="ph-bold ph-plus"></i><span class="hidden sm:inline">Nova venda</span><span class="sm:hidden">Venda</span>
       </button>
-      <button id="btn-reset" class="bg-rose-50 border border-rose-200 text-rose-700 px-3 py-2 rounded-lg font-bold text-xs hover:bg-rose-100" title="Zerar dados criptografados">Reset</button>
-      <button id="btn-sair" class="p-2 hover:bg-slate-100 rounded-lg text-slate-500" title="Sair">
-        <i class="ph-bold ph-sign-out"></i>
-      </button>
+      <button id="btn-reset" type="button" class="bg-rose-50 border border-rose-200 text-rose-700 px-3 py-2 rounded-xl font-bold text-xs hover:bg-rose-100 transition-colors" title="Zerar dados criptografados">Reset</button>
+
+      <div class="hidden sm:block h-8 w-px bg-slate-200 mx-1"></div>
+
+      <div class="flex items-center gap-2 sm:gap-3 bg-white/70 border border-slate-200 rounded-2xl pl-3 pr-2 py-1.5 shadow-sm">
+        <div class="hidden md:flex flex-col items-end leading-tight min-w-0">
+          <span id="admin-nome" class="text-sm font-bold text-slate-800 truncate max-w-[140px]">—</span>
+          <span id="admin-sessao-status" class="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Sessão ativa
+          </span>
+        </div>
+        <div id="admin-avatar" class="w-9 h-9 shrink-0 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-indigo-500/30" aria-hidden="true">—</div>
+        <button id="btn-sair" type="button" class="group flex items-center gap-2 bg-slate-900 hover:bg-black active:scale-[0.98] text-white pl-3 pr-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-slate-900/15 transition-all">
+          <i class="ph-bold ph-sign-out text-base group-hover:-translate-x-0.5 transition-transform"></i>
+          <span>Sair</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -176,6 +190,26 @@
 
   <div id="toast" class="fixed bottom-6 right-6 hidden px-4 py-3 rounded-xl bg-slate-900 text-white text-sm font-semibold shadow-xl z-50"></div>
 
+  <!-- Aviso de inatividade -->
+  <dialog id="modal-idle" class="rounded-2xl p-0 w-full max-w-sm backdrop:bg-slate-900/60 border-0 shadow-2xl">
+    <div class="p-8 text-center space-y-5">
+      <div class="w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+        <i class="ph-bold ph-clock-countdown text-3xl"></i>
+      </div>
+      <div class="space-y-2">
+        <h3 class="text-xl font-extrabold text-slate-900">Sessão expirando</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">
+          Por segurança, você será desconectado em
+          <span id="idle-countdown" class="inline-flex items-center justify-center min-w-[2ch] font-extrabold text-amber-600 text-base">30</span>s
+          por falta de atividade.
+        </p>
+      </div>
+      <button type="button" id="btn-idle-manter" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition-colors">
+        Continuar conectado
+      </button>
+    </div>
+  </dialog>
+
   <!-- ORDEM OBRIGATÓRIA — NÃO ALTERAR (ver js/security/LEIA-ME.txt) -->
   <script src="config.example.js"></script>
   <script src="config.local.js"></script>
@@ -184,6 +218,7 @@
   <script src="js/security/guard.js"></script>
   <script src="js/core/store.js"></script>
   <script src="js/core/dados.js"></script>
+  <script src="js/app/admin-session.js"></script>
   <script src="js/app/admin-app.js"></script>
 </body>
 </html>

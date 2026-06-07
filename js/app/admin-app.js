@@ -150,9 +150,10 @@ function abrirModalCliente(id) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  let sessao;
   try {
     await JCPag.init();
-    const sessao = await JCPag.guard.exigirAdmin();
+    sessao = await JCPag.guard.exigirAdmin();
     if (!sessao) return;
   } catch (e) {
     alert(e.message);
@@ -160,10 +161,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+  AdminSession.init(sessao);
+
   document.getElementById("venda-vencimento").value = JCPag.hoje();
   await renderTudo();
 
-  document.getElementById("btn-sair").addEventListener("click", () => JCPag.logout());
+  document.getElementById("btn-sair").addEventListener("click", async () => {
+    if (!confirm("Deseja encerrar sua sessão e voltar ao login?")) return;
+    AdminSession.stop();
+    await JCPag.logout("Logout manual");
+  });
   document.getElementById("btn-novo-cliente").addEventListener("click", () => abrirModalCliente(null));
   document.getElementById("btn-nova-venda").addEventListener("click", () => {
     preencherSelectClientes();
