@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * JCPag — Armazenamento criptografado (NÃO EDITAR)
+ * JCPag — Armazenamento criptografado
  * Único ponto de leitura/gravação de dados persistentes.
  * ============================================================================
  */
@@ -21,22 +21,55 @@ window.JCPagStore = (function () {
     };
   }
 
+  function storageSecrets() {
+    const cfg = window.JCPAG_CONFIG || {};
+    const list = [cfg.STORAGE_SECRET, ...(cfg.LEGACY_STORAGE_SECRETS || [])];
+    return [...new Set(list.filter((s) => typeof s === "string" && s.length >= 32))];
+  }
+
+  async function decryptWithSecret(raw, secret) {
+    const cfg = window.JCPAG_CONFIG;
+    const anterior = cfg.STORAGE_SECRET;
+    cfg.STORAGE_SECRET = secret;
+    try {
+      return await JCPagCrypto.decrypt(raw);
+    } finally {
+      cfg.STORAGE_SECRET = anterior;
+    }
+  }
+
   async function carregar() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      try {
-        const json = await JCPagCrypto.decrypt(raw);
-        const data = JSON.parse(json);
-        if (!data.v) throw new Error("Versão inválida");
-        return data;
-      } catch (e) {
-        console.warn(
-          "[JCPagStore] Dados incompatíveis ou corrompidos — base será reiniciada.",
-          e.message,
-        );
-        localStorage.removeItem(STORAGE_KEY);
-        return storeVazio();
+      const secrets = storageSecrets();
+      if (!secrets.length) {
+        throw new Error("JCPAG_CONFIG.STORAGE_SECRET inválido (mínimo 32 caracteres).");
       }
+
+      const chaveAtual = secrets[0];
+      let ultimoErro = null;
+
+      for (const secret of secrets) {
+        try {
+          const json = await decryptWithSecret(raw, secret);
+          const data = JSON.parse(json);
+          if (!data.v) throw new Error("Versão inválida");
+
+          if (secret !== chaveAtual) {
+            console.info("[JCPagStore] Dados abertos com chave legada — migrando para chave atual.");
+            await salvar(data);
+          }
+
+          return data;
+        } catch (e) {
+          ultimoErro = e;
+        }
+      }
+
+      console.error("[JCPagStore] Falha ao descriptografar:", ultimoErro?.message);
+      throw new Error(
+        "Não foi possível abrir os dados salvos. Seus dados NÃO foram apagados — verifique STORAGE_SECRET em config.example.js.",
+      );
     }
 
     if (localStorage.getItem(LEGACY_KEY)) {

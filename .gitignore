@@ -1,5 +1,4 @@
-# Arquivos locais — NÃO commitar
-config.local.js
+# Arquivos locais com segredos — NÃO commitar se alterados
 .env
 .env.*
 *.local

@@ -52,7 +52,7 @@ Leia `js/security/LEIA-ME.txt`.
 | Arquivo | Commitar? | Função |
 |---------|-----------|--------|
 | `config.example.js` | ✅ Sim | Configuração base documentada |
-| `config.local.js` | ❌ Não | Segredos de produção (`.gitignore`) |
+| `config.local.js` | ✅ Sim (stub vazio) | Overrides locais opcionais |
 | `config.local.example.js` | ✅ Sim | Modelo vazio |
 
 ---

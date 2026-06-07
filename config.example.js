@@ -8,6 +8,11 @@ window.JCPAG_CONFIG = {
   /** Chave de criptografia localStorage (mín. 32 caracteres) */
   STORAGE_SECRET: "jc-prod-storage-secret-32chars-min!!",
 
+  /** Chaves antigas — usadas só para abrir dados já salvos e migrar (não apaga) */
+  LEGACY_STORAGE_SECRETS: [
+    "jc-demo-storage-secret-32chars-min!!",
+  ],
+
   /** Assinatura HMAC das sessões */
   SESSION_PEPPER: "jc-prod-session-pepper-2026!!",
 
