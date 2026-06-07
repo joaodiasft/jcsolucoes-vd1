@@ -153,8 +153,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   let sessao;
   try {
     await JCPag.init();
-    sessao = await JCPag.guard.exigirAdmin();
-    if (!sessao) return;
+    sessao = await JCPag.validarSessaoAtiva();
+    if (!sessao || sessao.role !== "admin") {
+      window.location.replace("index.html");
+      return;
+    }
   } catch (e) {
     alert(e.message);
     window.location.href = "index.html";

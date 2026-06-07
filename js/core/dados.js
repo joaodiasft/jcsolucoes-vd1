@@ -56,17 +56,28 @@ window.JCPag = (function () {
     if (initPromise) return initPromise;
 
     initPromise = (async () => {
-      if (!window.JCPAG_CONFIG) {
-        throw new Error("JCPAG_CONFIG não carregado. Inclua config.example.js antes dos scripts.");
+      try {
+        if (!window.JCPAG_CONFIG) {
+          throw new Error("JCPAG_CONFIG não carregado. Inclua config.example.js antes dos scripts.");
+        }
+        store = await JCPagStore.carregar();
+        if (!store.clientes) store.clientes = [];
+        if (!store.contratos) store.contratos = [];
+        if (!store.parcelas) store.parcelas = [];
+        if (!store.logs) store.logs = [];
+        if (!store.inicializado) {
+          store.inicializado = true;
+          await persistir(false);
+        }
+        sincronizarAtrasos();
+        ready = true;
+        return store;
+      } catch (e) {
+        initPromise = null;
+        ready = false;
+        store = null;
+        throw e;
       }
-      store = await JCPagStore.carregar();
-      if (!store.inicializado) {
-        store.inicializado = true;
-        await persistir(false);
-      }
-      sincronizarAtrasos();
-      ready = true;
-      return store;
     })();
 
     return initPromise;
@@ -156,6 +167,81 @@ window.JCPag = (function () {
     throw new Error("Não foi possível gerar token único.");
   }
 
+  function listaPeppers(atual, legado) {
+    return [...new Set([atual, ...(legado || [])].filter((p) => typeof p === "string" && p.length >= 16))];
+  }
+
+  async function validarSessaoAtiva() {
+    const chaveAtual = cfg().SESSION_PEPPER;
+    const peppers = listaPeppers(chaveAtual, cfg().LEGACY_SESSION_PEPPERS);
+
+    for (const pepper of peppers) {
+      cfg().SESSION_PEPPER = pepper;
+      try {
+        const sessao = await JCPagAuth.validarSessao();
+        if (!sessao) continue;
+
+        cfg().SESSION_PEPPER = chaveAtual;
+        if (pepper !== chaveAtual) {
+          const { v, role, sid, exp, sig, ...dados } = sessao;
+          await JCPagAuth.criarSessao(role, dados);
+          return JCPagAuth.validarSessao();
+        }
+        return sessao;
+      } catch {
+        // tenta próximo pepper
+      }
+    }
+
+    cfg().SESSION_PEPPER = chaveAtual;
+    return null;
+  }
+
+  async function encontrarClientePorToken(token) {
+    const t = JCPagAuth.normalizarToken(token);
+    if (!t) return null;
+
+    const peppers = listaPeppers(cfg().TOKEN_PEPPER, cfg().LEGACY_TOKEN_PEPPERS);
+    for (const pepper of peppers) {
+      const anterior = cfg().TOKEN_PEPPER;
+      cfg().TOKEN_PEPPER = pepper;
+      try {
+        const hash = await JCPagAuth.hashToken(t);
+        const cliente = store.clientes.find((c) => c.ativo !== false && c.tokenHash === hash);
+        if (cliente) return cliente;
+      } finally {
+        cfg().TOKEN_PEPPER = anterior;
+      }
+    }
+    return null;
+  }
+
+  function resolverClienteDaSessao(sessao) {
+    const c = getCliente(sessao.clienteId);
+    if (c && c.ativo !== false) {
+      return { ...c, nome: c.nome || sessao.nome || "Cliente" };
+    }
+    if (sessao.clienteId) {
+      return {
+        id: sessao.clienteId,
+        nome: sessao.nome || "Cliente",
+        email: c?.email || "",
+        ativo: true,
+        _sessaoOrfa: !c,
+      };
+    }
+    return null;
+  }
+
+  async function obterContextoCliente() {
+    const sessao = await validarSessaoAtiva();
+    if (!sessao || sessao.role !== "cliente" || !sessao.clienteId) return null;
+    await init();
+    const cliente = resolverClienteDaSessao(sessao);
+    if (!cliente) return null;
+    return { sessao, cliente };
+  }
+
   // ===== AUTH =====
   async function login(token) {
     await init();
@@ -174,8 +260,7 @@ window.JCPag = (function () {
       return { ok: true, tipo: "admin", redirect: JCPagGuard.ROUTES.admin };
     }
 
-    const hash = await JCPagAuth.hashToken(t);
-    const cliente = store.clientes.find((c) => c.ativo && c.tokenHash === hash);
+    const cliente = await encontrarClientePorToken(t);
     if (cliente) {
       await JCPagAuth.criarSessao("cliente", { clienteId: cliente.id, nome: cliente.nome });
       JCPagAuth.limparFalhasLogin();
@@ -188,34 +273,24 @@ window.JCPag = (function () {
   }
 
   async function logout(detalhes) {
-    const sessao = await JCPagAuth.validarSessao();
+    const sessao = await validarSessaoAtiva();
     const msg = detalhes || "Painel administrativo";
-    if (sessao?.role === "admin") {
+    if (sessao?.role === "admin" && ready && store) {
       await registrarLog("Logout", msg, getAutorAdmin());
-    } else if (sessao?.role === "cliente") {
+    } else if (sessao?.role === "cliente" && ready && store) {
       const c = getCliente(sessao.clienteId);
-      if (c) await registrarLog("Logout", detalhes || "Portal do cliente", { nome: c.nome, tipo: "cliente" });
+      const autor = c
+        ? { nome: c.nome, tipo: "cliente" }
+        : { nome: sessao.nome || "Cliente", tipo: "cliente" };
+      await registrarLog("Logout", detalhes || "Portal do cliente", autor);
     }
     JCPagAuth.destruirSessao();
     window.location.href = JCPagGuard.ROUTES.login;
   }
 
   async function getClienteLogado() {
-    const sessao = await JCPagAuth.validarSessao();
-    if (!sessao || sessao.role !== "cliente") return null;
-    await init();
-    const c = getCliente(sessao.clienteId);
-    if (c?.ativo) return c;
-    if (sessao.nome) {
-      return {
-        id: sessao.clienteId,
-        nome: sessao.nome,
-        email: "",
-        ativo: true,
-        _sessaoOrfa: true,
-      };
-    }
-    return null;
+    const ctx = await obterContextoCliente();
+    return ctx?.cliente || null;
   }
 
   // ===== ADMIN (exige sessão admin validada) =====
@@ -339,20 +414,21 @@ window.JCPag = (function () {
   }
 
   async function registrarPagamentoPix(parcelaId) {
-    const sessao = await JCPagGuard.exigirCliente();
-    if (!sessao) throw new Error("Sessão cliente inválida");
+    await init();
+    const ctx = await obterContextoCliente();
+    if (!ctx) throw new Error("Sessão cliente inválida");
 
+    const { sessao, cliente } = ctx;
     const p = store.parcelas.find((x) => x.id === parcelaId);
     if (!p || p.clienteId !== sessao.clienteId) {
       throw new Error("Parcela não pertence a este cliente.");
     }
     if (p.status === "pago") throw new Error("Parcela já está paga.");
 
-    const cliente = getCliente(p.clienteId);
     await registrarLog(
       "Pagamento Pix solicitado",
-      `${cliente?.nome} · ${p.numero}ª · ${formatarMoeda(p.valor)} · venc. ${formatarData(p.vencimento)}`,
-      await getAutorCliente(),
+      `${cliente.nome} · ${p.numero}ª · ${formatarMoeda(p.valor)} · venc. ${formatarData(p.vencimento)}`,
+      { nome: cliente.nome, tipo: "cliente" },
     );
     return p;
   }
@@ -385,6 +461,8 @@ window.JCPag = (function () {
     login,
     logout,
     getClienteLogado,
+    obterContextoCliente,
+    validarSessaoAtiva,
     adicionarCliente,
     atualizarCliente,
     criarContrato,

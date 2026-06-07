@@ -25,25 +25,23 @@ function setupHeader(nome) {
   if (avatarEl) avatarEl.textContent = iniciais(display);
 }
 
-async function renderDashboard(sessao) {
-  const cliente = await JCPag.getClienteLogado();
-  if (!cliente) {
-    alert(
-      "Sessão inválida. Faça login novamente ou entre em contato com a JC Soluções.",
-    );
-    await JCPag.logout("Cliente não encontrado na base");
-    return;
-  }
+function renderEstadoCarregando() {
+  document.getElementById("contracts-table-body").innerHTML =
+    '<tr><td colspan="4" class="py-6 text-center text-slate-400">Carregando contratos…</td></tr>';
+  document.getElementById("payments-table-body").innerHTML =
+    '<tr><td colspan="5" class="py-6 text-center text-slate-400">Carregando faturas…</td></tr>';
+}
 
-  setupHeader(cliente.nome || sessao?.nome);
-
-  if (cliente._sessaoOrfa) {
-    toast("Seu cadastro não está na base de dados. Entre em contato com a JC Soluções.");
-  }
-
+async function renderDashboard(cliente) {
   const contratos = JCPag.contratosDoCliente(cliente.id);
   const parcelas = JCPag.parcelasDoCliente(cliente.id);
   const pix = JCPag.cfg().PIX;
+
+  setupHeader(cliente.nome);
+
+  if (cliente._sessaoOrfa) {
+    toast("Cadastro não encontrado na base. Peça ao administrador para recadastrar seu acesso.");
+  }
 
   const aberto = parcelas.filter((p) => p.status !== "pago");
   const totalAberto = aberto.reduce((s, p) => s + p.valor, 0);
@@ -122,24 +120,30 @@ async function renderDashboard(sessao) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  let sessao;
+  renderEstadoCarregando();
+
   try {
     await JCPag.init();
-    sessao = await JCPag.guard.exigirCliente();
-    if (!sessao) return;
-  } catch (e) {
-    alert(e.message);
-    window.location.href = "index.html";
-    return;
-  }
+    const ctx = await JCPag.obterContextoCliente();
+    if (!ctx) {
+      window.location.replace("index.html");
+      return;
+    }
 
-  if (sessao.nome) setupHeader(sessao.nome);
-
-  try {
-    await renderDashboard(sessao);
+    setupHeader(ctx.cliente.nome);
+    await renderDashboard(ctx.cliente);
   } catch (e) {
     console.error("[ClienteApp]", e);
-    toast("Erro ao carregar seu painel. Tente atualizar a página.");
+    setupHeader("Cliente");
+    document.getElementById("cliente-sessao-status").innerHTML =
+      '<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Erro ao carregar';
+    document.getElementById("contracts-table-body").innerHTML =
+      '<tr><td colspan="4" class="py-6 text-center text-rose-500 font-semibold">Não foi possível carregar seus dados.</td></tr>';
+    document.getElementById("payments-table-body").innerHTML =
+      '<tr><td colspan="5" class="py-6 text-center text-slate-400">—</td></tr>';
+    alert(e.message || "Erro ao carregar o painel. Tente fazer login novamente.");
+    window.location.replace("index.html");
+    return;
   }
 
   document.getElementById("btn-fechar-pix").addEventListener("click", () => {

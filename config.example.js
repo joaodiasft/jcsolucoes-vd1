@@ -13,11 +13,21 @@ window.JCPAG_CONFIG = {
     "jc-demo-storage-secret-32chars-min!!",
   ],
 
+  /** Pepper para hash dos tokens de login */
+  TOKEN_PEPPER: "jc-prod-pepper-jcsolucoes-2026",
+
+  /** Peppers antigos — tokens cadastrados antes da migração continuam válidos */
+  LEGACY_TOKEN_PEPPERS: [
+    "jc-demo-pepper-change-in-production-2026",
+  ],
+
   /** Assinatura HMAC das sessões */
   SESSION_PEPPER: "jc-prod-session-pepper-2026!!",
 
-  /** Pepper para hash dos tokens de login */
-  TOKEN_PEPPER: "jc-prod-pepper-jcsolucoes-2026",
+  /** Peppers antigos de sessão — login ativo antes da migração continua válido */
+  LEGACY_SESSION_PEPPERS: [
+    "jc-demo-session-pepper-2026!!",
+  ],
 
   /** Nome exibido do administrador (após login) */
   ADMIN_NOME: "João Claudio",
