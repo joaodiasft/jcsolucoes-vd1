@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>JC Soluções - Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #f1f5f9; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+  </style>
+</head>
+<body class="text-slate-900">
+
+  <div id="banner-demo" class="hidden bg-amber-500 text-amber-950 text-center text-xs font-bold py-2 px-4">
+    MODO DEMO ATIVO — Altere config.local.js antes de produção (SECURITY.md)
+  </div>
+
+  <header class="glass sticky top-0 z-30 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+        <i class="ph-fill ph-shield-check text-white"></i>
+      </div>
+      <h1 class="font-extrabold text-xl tracking-tight">JC Soluções <span class="text-slate-400 font-medium text-sm ml-2">Admin Panel</span></h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="btn-novo-cliente" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
+        <i class="ph-bold ph-user-plus"></i> Cliente
+      </button>
+      <button id="btn-nova-venda" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/20">
+        <i class="ph-bold ph-plus"></i> Nova venda
+      </button>
+      <button id="btn-reset" class="bg-rose-50 border border-rose-200 text-rose-700 px-3 py-2 rounded-lg font-bold text-xs hover:bg-rose-100" title="Zerar dados criptografados">Reset</button>
+      <button id="btn-sair" class="p-2 hover:bg-slate-100 rounded-lg text-slate-500" title="Sair">
+        <i class="ph-bold ph-sign-out"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-6 space-y-8">
+
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Faturamento</p>
+        <h3 id="dash-faturamento" class="text-2xl font-extrabold mt-1 text-slate-900">R$ 0,00</h3>
+      </div>
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Recebido</p>
+        <h3 id="dash-recebido" class="text-2xl font-extrabold mt-1 text-emerald-600">R$ 0,00</h3>
+      </div>
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <p class="text-xs font-bold text-amber-600 uppercase tracking-wider">A receber</p>
+        <h3 id="dash-pendente" class="text-2xl font-extrabold mt-1 text-amber-600">R$ 0,00</h3>
+      </div>
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <p class="text-xs font-bold text-rose-600 uppercase tracking-wider">Atrasado</p>
+        <h3 id="dash-atrasado" class="text-2xl font-extrabold mt-1 text-rose-600">R$ 0,00</h3>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-bold flex items-center gap-2"><i class="ph-bold ph-users text-indigo-600"></i> Clientes</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead class="text-[10px] uppercase text-slate-400 font-bold tracking-widest border-b border-slate-100">
+            <tr>
+              <th class="pb-4">Cliente</th>
+              <th class="pb-4">Contato</th>
+              <th class="pb-4">Token (mascarado)</th>
+              <th class="pb-4 text-center">Contratos</th>
+              <th class="pb-4">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="clients-table-body" class="text-sm font-medium"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-bold flex items-center gap-2"><i class="ph-bold ph-wallet text-indigo-600"></i> Movimentação financeira</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead class="text-[10px] uppercase text-slate-400 font-bold tracking-widest border-b border-slate-100">
+            <tr>
+              <th class="pb-4">Cliente</th>
+              <th class="pb-4">Contrato</th>
+              <th class="pb-4">Parcela</th>
+              <th class="pb-4">Vencimento</th>
+              <th class="pb-4 text-right">Valor</th>
+              <th class="pb-4 text-center">Status</th>
+              <th class="pb-4 text-center">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="financial-table-body" class="text-sm font-medium"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-bold flex items-center gap-2"><i class="ph-bold ph-list-checks text-indigo-600"></i> Log de ações</h2>
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Quem fez · O quê · Quando</span>
+      </div>
+      <div class="overflow-x-auto max-h-96 overflow-y-auto">
+        <table class="w-full text-left">
+          <thead class="text-[10px] uppercase text-slate-400 font-bold tracking-widest border-b border-slate-100 sticky top-0 bg-white">
+            <tr>
+              <th class="pb-4 pr-4">Data/Hora</th>
+              <th class="pb-4 pr-4">Autor</th>
+              <th class="pb-4 pr-4">Ação</th>
+              <th class="pb-4">Detalhes</th>
+            </tr>
+          </thead>
+          <tbody id="logs-table-body" class="text-sm font-medium"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Cliente -->
+  <dialog id="modal-cliente" class="rounded-2xl p-0 w-full max-w-md backdrop:bg-slate-900/50">
+    <form id="form-cliente" class="p-6 space-y-4">
+      <h3 class="text-lg font-bold" id="modal-cliente-titulo">Novo cliente</h3>
+      <input type="hidden" id="cliente-id">
+      <label class="block text-xs font-bold text-slate-500 uppercase">Nome
+        <input required id="cliente-nome" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-indigo-500">
+      </label>
+      <label class="block text-xs font-bold text-slate-500 uppercase">E-mail
+        <input required type="email" id="cliente-email" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-indigo-500">
+      </label>
+      <label class="block text-xs font-bold text-slate-500 uppercase">Telefone
+        <input id="cliente-telefone" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-indigo-500">
+      </label>
+      <label class="block text-xs font-bold text-slate-500 uppercase">Novo token (opcional)
+        <input id="cliente-token" maxlength="12" placeholder="Gerado automaticamente se vazio" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-indigo-500 uppercase">
+        <span id="cliente-token-hint" class="text-[10px] text-slate-400 font-normal normal-case mt-1 block"></span>
+      </label>
+      <div class="flex gap-2 pt-2">
+        <button type="button" id="btn-cancelar-cliente" class="flex-1 py-2 rounded-xl border border-slate-200 font-bold text-sm">Cancelar</button>
+        <button type="submit" class="flex-1 py-2 rounded-xl bg-indigo-600 text-white font-bold text-sm">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal Venda -->
+  <dialog id="modal-venda" class="rounded-2xl p-0 w-full max-w-md backdrop:bg-slate-900/50">
+    <form id="form-venda" class="p-6 space-y-4">
+      <h3 class="text-lg font-bold">Nova venda / contrato</h3>
+      <label class="block text-xs font-bold text-slate-500 uppercase">Cliente
+        <select required id="venda-cliente" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-indigo-500"></select>
+      </label>
+      <label class="block text-xs font-bold text-slate-500 uppercase">Serviço
+        <input required id="venda-servico" placeholder="Ex: Consultoria Dev" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-indigo-500">
+      </label>
+      <div class="grid grid-cols-2 gap-3">
+        <label class="block text-xs font-bold text-slate-500 uppercase">Valor total
+          <input required type="number" min="1" step="0.01" id="venda-valor" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-indigo-500">
+        </label>
+        <label class="block text-xs font-bold text-slate-500 uppercase">Parcelas
+          <input required type="number" min="1" max="48" id="venda-parcelas" value="6" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-indigo-500">
+        </label>
+      </div>
+      <label class="block text-xs font-bold text-slate-500 uppercase">1º vencimento
+        <input required type="date" id="venda-vencimento" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-indigo-500">
+      </label>
+      <div class="flex gap-2 pt-2">
+        <button type="button" id="btn-cancelar-venda" class="flex-1 py-2 rounded-xl border border-slate-200 font-bold text-sm">Cancelar</button>
+        <button type="submit" class="flex-1 py-2 rounded-xl bg-indigo-600 text-white font-bold text-sm">Criar contrato</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="fixed bottom-6 right-6 hidden px-4 py-3 rounded-xl bg-slate-900 text-white text-sm font-semibold shadow-xl z-50"></div>
+
+  <!-- ORDEM OBRIGATÓRIA — NÃO ALTERAR (ver js/security/LEIA-ME.txt) -->
+  <script src="config.example.js"></script>
+  <script src="config.local.js"></script>
+  <script src="js/security/crypto.js"></script>
+  <script src="js/security/auth.js"></script>
+  <script src="js/security/guard.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/dados.js"></script>
+  <script src="js/app/admin-app.js"></script>
+</body>
+</html>

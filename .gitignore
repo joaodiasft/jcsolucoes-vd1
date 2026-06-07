@@ -1,0 +1,19 @@
+# Arquivos locais — NÃO commitar
+config.local.js
+.env
+.env.*
+*.local
+
+# SO / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+
+# Dados legados (navegador usa localStorage, não versionar)
+jc-pagamentos-v1
+jc-pag-encrypted-v2

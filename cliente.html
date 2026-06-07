@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>JC Soluções - Meu Painel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+  </style>
+</head>
+<body class="text-slate-900">
+
+  <header class="glass sticky top-0 z-30 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+        <i class="ph-fill ph-user text-white"></i>
+      </div>
+      <h1 class="font-extrabold text-xl tracking-tight">JC Soluções <span class="text-slate-400 font-medium text-sm ml-2">Painel do Cliente</span></h1>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="hidden md:inline text-sm font-semibold text-slate-600" id="user-name">Carregando...</span>
+      <button id="btn-sair" class="p-2 hover:bg-slate-100 rounded-lg text-slate-500" title="Sair">
+        <i class="ph-bold ph-sign-out"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-6 space-y-8">
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total em aberto</p>
+        <h3 id="dash-total-debt" class="text-2xl font-extrabold mt-1 text-slate-900">R$ 0,00</h3>
+      </div>
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <p class="text-xs font-bold text-amber-600 uppercase tracking-wider">Próximo vencimento</p>
+        <h3 id="dash-next-due" class="text-2xl font-extrabold mt-1 text-amber-600">—</h3>
+      </div>
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Status do plano</p>
+        <h3 id="dash-status" class="text-2xl font-extrabold mt-1 text-emerald-600">—</h3>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-bold flex items-center gap-2"><i class="ph-bold ph-clipboard-text text-indigo-600"></i> Meus contratos</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead class="text-[10px] uppercase text-slate-400 font-bold tracking-widest border-b border-slate-100">
+            <tr><th class="pb-4">Serviço</th><th class="pb-4">Início</th><th class="pb-4 text-right">Valor total</th><th class="pb-4 text-center">Status</th></tr>
+          </thead>
+          <tbody id="contracts-table-body" class="text-sm font-medium"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-bold flex items-center gap-2"><i class="ph-bold ph-receipt text-indigo-600"></i> Faturas e boletos</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead class="text-[10px] uppercase text-slate-400 font-bold tracking-widest border-b border-slate-100">
+            <tr><th class="pb-4">Parcela</th><th class="pb-4">Vencimento</th><th class="pb-4 text-right">Valor</th><th class="pb-4 text-center">Status</th><th class="pb-4 text-center">Ação</th></tr>
+          </thead>
+          <tbody id="payments-table-body" class="text-sm font-medium"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="fixed bottom-6 right-6 hidden px-4 py-3 rounded-xl bg-slate-900 text-white text-sm font-semibold shadow-xl z-50"></div>
+
+  <!-- Modal Pix -->
+  <dialog id="modal-pix" class="rounded-2xl p-0 w-full max-w-sm backdrop:bg-slate-900/60 border-0 shadow-2xl">
+    <div class="p-6 space-y-5">
+      <div class="text-center">
+        <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+          <i class="ph-fill ph-qr-code text-emerald-600 text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-extrabold text-slate-900">Pagamento via Pix</h3>
+        <p class="text-sm text-slate-500 mt-1">Use os dados abaixo para pagar a parcela</p>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3 text-sm">
+        <div class="flex justify-between gap-3">
+          <span class="text-slate-500 font-semibold">Parcela</span>
+          <span id="pix-parcela" class="font-bold text-slate-900 text-right">—</span>
+        </div>
+        <div class="flex justify-between gap-3">
+          <span class="text-slate-500 font-semibold">Valor</span>
+          <span id="pix-valor" class="font-extrabold text-emerald-600 text-lg">—</span>
+        </div>
+        <hr class="border-slate-200">
+        <div>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pix · E-mail</p>
+          <p id="pix-email" class="font-bold text-slate-900 break-all">jcsolucoesgo@gmail.com</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Banco</p>
+          <p id="pix-banco" class="font-bold text-slate-900">Sicoob</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Nome</p>
+          <p id="pix-nome" class="font-bold text-slate-900">João Claudio</p>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-500 text-center leading-relaxed">
+        Após o pagamento, envie o comprovante para a JC Soluções. A confirmação será feita pelo administrador.
+      </p>
+
+      <div class="flex gap-2">
+        <button type="button" id="btn-copiar-pix" class="flex-1 py-3 rounded-xl border border-slate-200 font-bold text-sm hover:bg-slate-50 flex items-center justify-center gap-2">
+          <i class="ph-bold ph-copy"></i> Copiar e-mail
+        </button>
+        <button type="button" id="btn-fechar-pix" class="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ORDEM OBRIGATÓRIA — NÃO ALTERAR (ver js/security/LEIA-ME.txt) -->
+  <script src="config.example.js"></script>
+  <script src="config.local.js"></script>
+  <script src="js/security/crypto.js"></script>
+  <script src="js/security/auth.js"></script>
+  <script src="js/security/guard.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/dados.js"></script>
+  <script src="js/app/cliente-app.js"></script>
+</body>
+</html>

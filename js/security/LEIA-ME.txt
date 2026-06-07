@@ -1,0 +1,18 @@
+================================================================================
+  MÓDULOS DE SEGURANÇA — NÃO EDITE ESTES ARQUIVOS
+================================================================================
+
+Os arquivos desta pasta (crypto.js, auth.js, guard.js) implementam:
+
+  - Criptografia AES-256-GCM dos dados no navegador
+  - Hash de tokens (SHA-256 + pepper)
+  - Sessões assinadas com HMAC
+  - Validação de integridade e expiração
+
+IMPORTANTE:
+  • Alterar estes arquivos quebra a segurança e a compatibilidade dos dados.
+  • Este sistema roda 100% no front-end — NÃO substitui um backend em produção.
+  • Leia SECURITY.md na raiz do projeto antes de publicar.
+
+Para configurar segredos, edite APENAS config.js (copiado de config.example.js).
+================================================================================
