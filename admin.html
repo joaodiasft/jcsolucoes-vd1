@@ -3,43 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>JC Soluções — Gestão</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link rel="stylesheet" href="css/jcpag-theme.css?v=6">
+  <link rel="stylesheet" href="css/jcpag-theme.css?v=7">
 </head>
 <body class="jcpag-body">
 
-  <header class="jcpag-header jcpag-header-admin">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="jcpag-logo-icon jcpag-logo-icon--admin">
-          <i class="ph-fill ph-shield-check text-lg"></i>
+  <header class="jcpag-header">
+    <div class="jcpag-header-inner">
+      <div class="jcpag-brand">
+        <div class="jcpag-brand-icon jcpag-brand-icon--admin">
+          <i class="ph-fill ph-shield-check"></i>
         </div>
-        <h1 class="jcpag-header-title">JC Soluções <span class="jcpag-header-sub">Gestão</span></h1>
+        <h1 class="jcpag-brand-text">JC Soluções<span class="jcpag-brand-tag">Gestão</span></h1>
       </div>
 
-      <div class="flex flex-wrap items-center justify-end gap-2">
-        <button id="btn-novo-cliente" type="button" class="jcpag-btn-ghost flex items-center gap-2">
-          <i class="ph-bold ph-user-plus"></i><span class="hidden sm:inline">Cliente</span>
+      <div class="jcpag-toolbar">
+        <button id="btn-novo-cliente" type="button" class="jcpag-btn jcpag-btn-outline">
+          <i class="ph-bold ph-user-plus"></i><span class="jcpag-hide-mobile">Cliente</span>
         </button>
-        <button id="btn-nova-venda" type="button" class="jcpag-btn-primary jcpag-btn-teal !w-auto px-4 py-2 text-sm flex items-center gap-2">
-          <i class="ph-bold ph-plus"></i><span class="hidden sm:inline">Nova venda</span>
+        <button id="btn-nova-venda" type="button" class="jcpag-btn jcpag-btn-accent">
+          <i class="ph-bold ph-plus"></i><span class="jcpag-hide-mobile">Nova venda</span>
         </button>
-        <button id="btn-reset" type="button" class="jcpag-btn-ghost jcpag-btn-danger text-xs" title="Zerar dados">Reset</button>
+        <button id="btn-reset" type="button" class="jcpag-btn jcpag-btn-danger jcpag-btn-sm" title="Zerar dados">Reset</button>
 
-        <div class="jcpag-user-chip ml-1">
-          <div class="flex flex-col items-end leading-tight min-w-0">
-            <span id="admin-nome" class="text-xs font-bold text-white truncate max-w-[120px]">—</span>
-            <span id="admin-sessao-status" class="text-[10px] font-semibold text-emerald-400 flex items-center gap-1">
+        <div class="jcpag-user-bar">
+          <div class="jcpag-user-info">
+            <span id="admin-nome" class="jcpag-user-name">—</span>
+            <span id="admin-sessao-status" class="jcpag-user-status">
               <span class="jcpag-status-dot"></span>Sessão ativa
             </span>
           </div>
-          <div id="admin-avatar" class="jcpag-avatar jcpag-avatar--admin" aria-hidden="true">—</div>
-          <button id="btn-sair" type="button" class="jcpag-btn-logout">
-            <i class="ph-bold ph-sign-out"></i><span>Sair</span>
+          <div id="admin-avatar" class="jcpag-avatar" aria-hidden="true">—</div>
+          <button id="btn-sair" type="button" class="jcpag-btn jcpag-btn-outline jcpag-btn-sm">
+            <i class="ph-bold ph-sign-out"></i> Sair
           </button>
         </div>
       </div>
@@ -48,27 +47,27 @@
 
   <main class="jcpag-main">
     <section class="jcpag-kpi-grid">
-      <div class="jcpag-kpi jcpag-animate" style="--jc-kpi-accent: var(--jc-ink); --jc-kpi-color: var(--jc-ink);">
+      <div class="jcpag-kpi">
         <p class="jcpag-kpi-label">Faturamento</p>
-        <h3 id="dash-faturamento" class="jcpag-kpi-value">R$ 0,00</h3>
+        <p id="dash-faturamento" class="jcpag-kpi-value">R$ 0,00</p>
       </div>
-      <div class="jcpag-kpi jcpag-animate jcpag-animate-d1" style="--jc-kpi-accent: var(--jc-success); --jc-kpi-color: var(--jc-success);">
+      <div class="jcpag-kpi">
         <p class="jcpag-kpi-label">Recebido</p>
-        <h3 id="dash-recebido" class="jcpag-kpi-value">R$ 0,00</h3>
+        <p id="dash-recebido" class="jcpag-kpi-value" style="color: var(--jc-success)">R$ 0,00</p>
       </div>
-      <div class="jcpag-kpi jcpag-animate jcpag-animate-d2" style="--jc-kpi-accent: var(--jc-gold); --jc-kpi-color: #b45309;">
+      <div class="jcpag-kpi">
         <p class="jcpag-kpi-label">A receber</p>
-        <h3 id="dash-pendente" class="jcpag-kpi-value">R$ 0,00</h3>
+        <p id="dash-pendente" class="jcpag-kpi-value" style="color: var(--jc-warn)">R$ 0,00</p>
       </div>
-      <div class="jcpag-kpi jcpag-animate jcpag-animate-d3" style="--jc-kpi-accent: var(--jc-danger); --jc-kpi-color: var(--jc-danger);">
+      <div class="jcpag-kpi">
         <p class="jcpag-kpi-label">Atrasado</p>
-        <h3 id="dash-atrasado" class="jcpag-kpi-value">R$ 0,00</h3>
+        <p id="dash-atrasado" class="jcpag-kpi-value" style="color: var(--jc-danger)">R$ 0,00</p>
       </div>
     </section>
 
-    <section class="jcpag-section jcpag-animate jcpag-animate-d2">
+    <section class="jcpag-section">
       <h2 class="jcpag-section-title"><i class="ph-bold ph-users"></i> Clientes</h2>
-      <div class="overflow-x-auto">
+      <div class="jcpag-table-wrap">
         <table class="jcpag-table">
           <thead>
             <tr>
@@ -80,9 +79,9 @@
       </div>
     </section>
 
-    <section class="jcpag-section jcpag-animate jcpag-animate-d3">
+    <section class="jcpag-section">
       <h2 class="jcpag-section-title"><i class="ph-bold ph-wallet"></i> Movimentação financeira</h2>
-      <div class="overflow-x-auto">
+      <div class="jcpag-table-wrap">
         <table class="jcpag-table">
           <thead>
             <tr>
@@ -95,14 +94,14 @@
       </div>
     </section>
 
-    <section class="jcpag-section jcpag-animate jcpag-animate-d4">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="jcpag-section-title mb-0"><i class="ph-bold ph-list-checks"></i> Log de ações</h2>
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Auditoria</span>
+    <section class="jcpag-section">
+      <div class="jcpag-section-head">
+        <h2 class="jcpag-section-title"><i class="ph-bold ph-list-checks"></i> Log de ações</h2>
+        <span class="jcpag-section-meta">Auditoria</span>
       </div>
-      <div class="overflow-x-auto max-h-96 overflow-y-auto">
+      <div class="jcpag-table-wrap" style="max-height: 24rem; overflow-y: auto;">
         <table class="jcpag-table">
-          <thead class="sticky top-0 bg-white">
+          <thead>
             <tr><th>Data/Hora</th><th>Autor</th><th>Ação</th><th>Detalhes</th></tr>
           </thead>
           <tbody id="logs-table-body"></tbody>
@@ -112,43 +111,61 @@
   </main>
 
   <dialog id="modal-cliente" class="jcpag-dialog">
-    <form id="form-cliente" class="jcpag-dialog-body space-y-4">
-      <h3 class="jcpag-display text-lg font-bold" id="modal-cliente-titulo">Novo cliente</h3>
+    <form id="form-cliente" class="jcpag-dialog-body">
+      <h3 class="jcpag-dialog-title" id="modal-cliente-titulo">Novo cliente</h3>
       <input type="hidden" id="cliente-id">
-      <label class="block"><span class="jcpag-label">Nome</span>
-        <input required id="cliente-nome" class="jcpag-input mt-1"></label>
-      <label class="block"><span class="jcpag-label">E-mail</span>
-        <input required type="email" id="cliente-email" class="jcpag-input mt-1"></label>
-      <label class="block"><span class="jcpag-label">Telefone</span>
-        <input id="cliente-telefone" class="jcpag-input mt-1"></label>
-      <label class="block"><span class="jcpag-label">Novo token (opcional)</span>
-        <input id="cliente-token" maxlength="12" placeholder="Gerado automaticamente" class="jcpag-input mt-1 uppercase">
-        <span id="cliente-token-hint" class="text-[10px] text-slate-400 mt-1 block normal-case"></span></label>
-      <div class="flex gap-2 pt-2">
-        <button type="button" id="btn-cancelar-cliente" class="jcpag-btn-ghost flex-1">Cancelar</button>
-        <button type="submit" class="jcpag-btn-primary jcpag-btn-teal !w-auto flex-1">Salvar</button>
+      <div class="jcpag-field">
+        <label class="jcpag-label">Nome</label>
+        <input required id="cliente-nome" class="jcpag-input">
+      </div>
+      <div class="jcpag-field">
+        <label class="jcpag-label">E-mail</label>
+        <input required type="email" id="cliente-email" class="jcpag-input">
+      </div>
+      <div class="jcpag-field">
+        <label class="jcpag-label">Telefone</label>
+        <input id="cliente-telefone" class="jcpag-input">
+      </div>
+      <div class="jcpag-field">
+        <label class="jcpag-label">Novo token (opcional)</label>
+        <input id="cliente-token" maxlength="12" placeholder="Gerado automaticamente" class="jcpag-input" style="text-transform: uppercase">
+        <span id="cliente-token-hint" class="jcpag-footnote" style="text-align: left; margin-top: 0.35rem;"></span>
+      </div>
+      <div class="jcpag-dialog-actions">
+        <button type="button" id="btn-cancelar-cliente" class="jcpag-btn jcpag-btn-outline">Cancelar</button>
+        <button type="submit" class="jcpag-btn jcpag-btn-accent">Salvar</button>
       </div>
     </form>
   </dialog>
 
   <dialog id="modal-venda" class="jcpag-dialog">
-    <form id="form-venda" class="jcpag-dialog-body space-y-4">
-      <h3 class="jcpag-display text-lg font-bold">Nova venda / contrato</h3>
-      <label class="block"><span class="jcpag-label">Cliente</span>
-        <select required id="venda-cliente" class="jcpag-input mt-1"></select></label>
-      <label class="block"><span class="jcpag-label">Serviço</span>
-        <input required id="venda-servico" placeholder="Ex: Consultoria Dev" class="jcpag-input mt-1"></label>
-      <div class="grid grid-cols-2 gap-3">
-        <label class="block"><span class="jcpag-label">Valor total</span>
-          <input required type="number" min="1" step="0.01" id="venda-valor" class="jcpag-input mt-1"></label>
-        <label class="block"><span class="jcpag-label">Parcelas</span>
-          <input required type="number" min="1" max="48" id="venda-parcelas" value="6" class="jcpag-input mt-1"></label>
+    <form id="form-venda" class="jcpag-dialog-body">
+      <h3 class="jcpag-dialog-title">Nova venda / contrato</h3>
+      <div class="jcpag-field">
+        <label class="jcpag-label">Cliente</label>
+        <select required id="venda-cliente" class="jcpag-input"></select>
       </div>
-      <label class="block"><span class="jcpag-label">1º vencimento</span>
-        <input required type="date" id="venda-vencimento" class="jcpag-input mt-1"></label>
-      <div class="flex gap-2 pt-2">
-        <button type="button" id="btn-cancelar-venda" class="jcpag-btn-ghost flex-1">Cancelar</button>
-        <button type="submit" class="jcpag-btn-primary jcpag-btn-teal !w-auto flex-1">Criar contrato</button>
+      <div class="jcpag-field">
+        <label class="jcpag-label">Serviço</label>
+        <input required id="venda-servico" placeholder="Ex: Consultoria Dev" class="jcpag-input">
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+        <div class="jcpag-field">
+          <label class="jcpag-label">Valor total</label>
+          <input required type="number" min="1" step="0.01" id="venda-valor" class="jcpag-input">
+        </div>
+        <div class="jcpag-field">
+          <label class="jcpag-label">Parcelas</label>
+          <input required type="number" min="1" max="48" id="venda-parcelas" value="6" class="jcpag-input">
+        </div>
+      </div>
+      <div class="jcpag-field">
+        <label class="jcpag-label">1º vencimento</label>
+        <input required type="date" id="venda-vencimento" class="jcpag-input">
+      </div>
+      <div class="jcpag-dialog-actions">
+        <button type="button" id="btn-cancelar-venda" class="jcpag-btn jcpag-btn-outline">Cancelar</button>
+        <button type="submit" class="jcpag-btn jcpag-btn-accent">Criar contrato</button>
       </div>
     </form>
   </dialog>
@@ -156,28 +173,26 @@
   <div id="toast" class="jcpag-toast hidden"></div>
 
   <dialog id="modal-idle" class="jcpag-dialog">
-    <div class="jcpag-dialog-body text-center space-y-5">
-      <div class="w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
-        <i class="ph-bold ph-clock-countdown text-3xl"></i>
+    <div class="jcpag-dialog-body" style="text-align: center;">
+      <div style="width: 56px; height: 56px; margin: 0 auto 1rem; background: var(--jc-warn-soft); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--jc-warn); font-size: 1.5rem;">
+        <i class="ph-bold ph-clock-countdown"></i>
       </div>
-      <div>
-        <h3 class="jcpag-display text-xl font-bold">Sessão expirando</h3>
-        <p class="text-sm text-slate-500 mt-2">
-          Desconexão em <strong id="idle-countdown" class="text-amber-600">30</strong>s por inatividade.
-        </p>
-      </div>
-      <button type="button" id="btn-idle-manter" class="jcpag-btn-primary jcpag-btn-teal">Continuar conectado</button>
+      <h3 class="jcpag-dialog-title">Sessão expirando</h3>
+      <p style="font-size: 0.875rem; color: var(--jc-muted); margin: 0 0 1.25rem;">
+        Desconexão em <strong id="idle-countdown" style="color: var(--jc-warn);">30</strong>s por inatividade.
+      </p>
+      <button type="button" id="btn-idle-manter" class="jcpag-btn-primary">Continuar conectado</button>
     </div>
   </dialog>
 
-  <script src="config.example.js?v=6"></script>
-  <script src="config.local.js?v=6"></script>
-  <script src="js/security/crypto.js?v=6"></script>
-  <script src="js/security/auth.js?v=6"></script>
-  <script src="js/security/guard.js?v=6"></script>
-  <script src="js/core/store.js?v=6"></script>
-  <script src="js/core/dados.js?v=6"></script>
-  <script src="js/app/admin-session.js?v=6"></script>
-  <script src="js/app/admin-app.js?v=6"></script>
+  <script src="config.example.js?v=7"></script>
+  <script src="config.local.js?v=7"></script>
+  <script src="js/security/crypto.js?v=7"></script>
+  <script src="js/security/auth.js?v=7"></script>
+  <script src="js/security/guard.js?v=7"></script>
+  <script src="js/core/store.js?v=7"></script>
+  <script src="js/core/dados.js?v=7"></script>
+  <script src="js/app/admin-session.js?v=7"></script>
+  <script src="js/app/admin-app.js?v=7"></script>
 </body>
 </html>

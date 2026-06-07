@@ -37,15 +37,13 @@ window.AdminSession = (function () {
   function setStatus(ativo) {
     if (!statusEl) return;
     if (ativo) {
-      statusEl.className =
-        "text-[10px] font-semibold text-emerald-600 flex items-center gap-1";
-      statusEl.innerHTML =
-        '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>Sessão ativa';
+      statusEl.className = "jcpag-user-status";
+      statusEl.style.color = "";
+      statusEl.innerHTML = '<span class="jcpag-status-dot"></span>Sessão ativa';
     } else {
-      statusEl.className =
-        "text-[10px] font-semibold text-amber-600 flex items-center gap-1";
-      statusEl.innerHTML =
-        '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Expirando…';
+      statusEl.className = "jcpag-user-status";
+      statusEl.style.color = "var(--jc-warn)";
+      statusEl.innerHTML = '<span class="jcpag-status-dot" style="background: var(--jc-warn)"></span>Expirando…';
     }
   }
 

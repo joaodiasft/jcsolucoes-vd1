@@ -53,16 +53,17 @@ async function renderDashboard(cliente) {
 
   const statusEl = document.getElementById("dash-status");
   statusEl.textContent = temAtraso ? "Inadimplente" : contratos.length ? "Ativo" : "Sem contrato";
-  statusEl.className = "jcpag-kpi-value text-lg " + (temAtraso ? "text-rose-600" : "text-emerald-600");
+  statusEl.className = "jcpag-kpi-value jcpag-kpi-value--sm";
+  statusEl.style.color = temAtraso ? "var(--jc-danger)" : "var(--jc-success)";
 
   const tbodyContratos = document.getElementById("contracts-table-body");
   tbodyContratos.innerHTML = contratos.length
     ? contratos
         .map(
           (c) => `<tr>
-        <td class="font-bold">${c.servico}</td>
-        <td class="text-slate-500">${JCPag.formatarData(c.dataInicio)}</td>
-        <td class="text-right font-bold">${JCPag.formatarMoeda(c.valorTotal)}</td>
+        <td><strong>${c.servico}</strong></td>
+        <td style="color: var(--jc-muted)">${JCPag.formatarData(c.dataInicio)}</td>
+        <td class="text-right"><strong>${JCPag.formatarMoeda(c.valorTotal)}</strong></td>
         <td class="text-center"><span class="jcpag-badge jcpag-badge--ok">${c.status}</span></td>
       </tr>`,
         )
@@ -82,13 +83,13 @@ async function renderDashboard(cliente) {
       const st = JCPag.statusLabel(p.status);
       const acao =
         p.status !== "pago"
-          ? `<button type="button" data-pix="${p.id}" class="jcpag-btn-primary jcpag-btn-teal !w-auto !py-1.5 !px-3 text-[10px] uppercase">Pagar Pix</button>`
-          : '<span class="text-slate-300 text-xs italic">Pago</span>';
+          ? `<button type="button" data-pix="${p.id}" class="jcpag-btn jcpag-btn-accent jcpag-btn-sm">Pagar Pix</button>`
+          : '<span style="color: var(--jc-muted); font-size: 0.75rem;">Pago</span>';
 
       return `<tr>
         <td>${p.numero}ª parcela</td>
         <td>${JCPag.formatarData(p.vencimento)}</td>
-        <td class="text-right font-bold">${JCPag.formatarMoeda(p.valor)}</td>
+        <td class="text-right"><strong>${JCPag.formatarMoeda(p.valor)}</strong></td>
         <td class="text-center"><span class="${st.cls}">${st.texto}</span></td>
         <td class="text-center">${acao}</td>
       </tr>`;
@@ -136,11 +137,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("[ClienteApp]", e);
     setupHeader("Cliente");
     document.getElementById("cliente-sessao-status").innerHTML =
-      '<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Erro ao carregar';
+      '<span class="jcpag-status-dot" style="background: var(--jc-danger)"></span>Erro';
     document.getElementById("contracts-table-body").innerHTML =
-      '<tr><td colspan="4" class="py-6 text-center text-rose-500 font-semibold">Não foi possível carregar seus dados.</td></tr>';
+      '<tr><td colspan="4" class="jcpag-empty" style="color: var(--jc-danger)">Não foi possível carregar seus dados.</td></tr>';
     document.getElementById("payments-table-body").innerHTML =
-      '<tr><td colspan="5" class="py-6 text-center text-slate-400">—</td></tr>';
+      '<tr><td colspan="5" class="jcpag-empty">—</td></tr>';
     alert(e.message || "Erro ao carregar o painel. Tente fazer login novamente.");
     window.location.replace("index.html");
     return;

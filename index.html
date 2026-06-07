@@ -3,65 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>JC Soluções — Entrar</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link rel="stylesheet" href="css/jcpag-theme.css?v=6">
+  <link rel="stylesheet" href="css/jcpag-theme.css?v=7">
 </head>
 <body class="jcpag-body">
 
-  <div class="jcpag-login-wrap">
-    <aside class="jcpag-login-brand jcpag-animate hidden md:flex">
-      <div class="jcpag-brand-badge">
-        <i class="ph-fill ph-vault text-2xl text-white"></i>
+  <div class="jcpag-login-page">
+    <div class="jcpag-login-card">
+      <div class="jcpag-login-logo">
+        <i class="ph-fill ph-lock-key"></i>
       </div>
-      <div class="jcpag-brand-line"></div>
-      <h1 class="jcpag-brand-title">JC Soluções</h1>
-      <p class="jcpag-brand-sub">Portal seguro de pagamentos e gestão de contratos. Acesso exclusivo por token.</p>
-      <p class="mt-auto text-xs text-white/40 pt-8">Dados criptografados · Sessão assinada</p>
-    </aside>
+      <h1 class="jcpag-login-title">JC Soluções</h1>
+      <p class="jcpag-login-sub">Digite seu token de acesso</p>
 
-    <div class="jcpag-login-panel">
-      <div class="jcpag-card jcpag-animate jcpag-animate-d1">
-        <div class="text-center mb-8 md:hidden">
-          <div class="jcpag-brand-badge mx-auto mb-4">
-            <i class="ph-fill ph-vault text-2xl text-white"></i>
-          </div>
-          <h1 class="jcpag-display text-2xl font-extrabold">JC Soluções</h1>
+      <form id="login-form" class="jcpag-form-stack" autocomplete="off">
+        <div>
+          <label class="jcpag-label" for="token">Token</label>
+          <input required type="password" id="token" maxlength="64" autocomplete="off"
+            class="jcpag-input" placeholder="••••••••">
         </div>
+        <p id="login-erro" class="jcpag-erro hidden"></p>
+        <button type="submit" id="btn-login" class="jcpag-btn-primary">
+          <span id="btn-text">Entrar</span>
+        </button>
+      </form>
 
-        <div class="hidden md:block mb-8">
-          <h2 class="jcpag-display text-xl font-bold">Entrar</h2>
-          <p class="text-sm text-slate-500 mt-1">Digite seu token de acesso</p>
-        </div>
-        <p class="md:hidden text-center text-sm text-slate-500 mb-6">Digite seu token de acesso</p>
-
-        <form id="login-form" class="space-y-5" autocomplete="off">
-          <div>
-            <label class="jcpag-label" for="token">Token</label>
-            <input required type="password" id="token" maxlength="64" autocomplete="off"
-              class="jcpag-input text-center tracking-widest" placeholder="••••••••">
-          </div>
-          <p id="login-erro" class="jcpag-erro hidden"></p>
-          <button type="submit" id="btn-login" class="jcpag-btn-primary">
-            <span id="btn-text">Entrar</span>
-          </button>
-        </form>
-
-        <p class="text-center text-xs text-slate-400 mt-6">Problemas no acesso? Entre em contato com a JC Soluções.</p>
-      </div>
+      <p class="jcpag-footnote">Problemas no acesso? Entre em contato com a JC Soluções.</p>
     </div>
   </div>
 
-  <script src="config.example.js?v=6"></script>
-  <script src="config.local.js?v=6"></script>
-  <script src="js/security/crypto.js?v=6"></script>
-  <script src="js/security/auth.js?v=6"></script>
-  <script src="js/security/guard.js?v=6"></script>
-  <script src="js/core/store.js?v=6"></script>
-  <script src="js/core/dados.js?v=6"></script>
-  <script src="js/app/login.js?v=6"></script>
+  <script src="config.example.js?v=7"></script>
+  <script src="config.local.js?v=7"></script>
+  <script src="js/security/crypto.js?v=7"></script>
+  <script src="js/security/auth.js?v=7"></script>
+  <script src="js/security/guard.js?v=7"></script>
+  <script src="js/core/store.js?v=7"></script>
+  <script src="js/core/dados.js?v=7"></script>
+  <script src="js/app/login.js?v=7"></script>
 </body>
 </html>

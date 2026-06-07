@@ -29,11 +29,11 @@ function renderClientes() {
     .map((c) => {
       const qtd = JCPag.contratosDoCliente(c.id).length;
       return `<tr>
-        <td class="font-bold">${c.nome}</td>
-        <td class="text-slate-500">${c.email}<br><span class="text-xs">${c.telefone || "—"}</span></td>
-        <td><code class="px-2 py-1 bg-slate-100 rounded-lg text-xs font-bold">${c.tokenPreview}</code></td>
-        <td class="text-center font-bold">${qtd}</td>
-        <td><button type="button" data-editar="${c.id}" class="jcpag-link-action">Editar</button></td>
+        <td><strong>${c.nome}</strong></td>
+        <td style="color: var(--jc-muted)">${c.email}<br><small>${c.telefone || "—"}</small></td>
+        <td><code class="jcpag-code">${c.tokenPreview}</code></td>
+        <td class="text-center"><strong>${qtd}</strong></td>
+        <td><button type="button" data-editar="${c.id}" class="jcpag-link-btn">Editar</button></td>
       </tr>`;
     })
     .join("");
@@ -59,15 +59,15 @@ function renderFinanceiro() {
       const st = JCPag.statusLabel(p.status);
       const btn =
         p.status !== "pago"
-          ? `<button type="button" data-pagar="${p.id}" class="jcpag-link-action">Marcar pago</button>`
-          : '<span class="text-slate-300 text-xs">—</span>';
+          ? `<button type="button" data-pagar="${p.id}" class="jcpag-link-btn">Marcar pago</button>`
+          : '<span style="color: var(--jc-muted); font-size: 0.75rem;">—</span>';
 
       return `<tr>
         <td>${cliente ? cliente.nome : "—"}</td>
         <td>${contrato ? contrato.servico : "—"}</td>
         <td>${p.numero}x</td>
         <td>${JCPag.formatarData(p.vencimento)}</td>
-        <td class="text-right font-bold">${JCPag.formatarMoeda(p.valor)}</td>
+        <td class="text-right"><strong>${JCPag.formatarMoeda(p.valor)}</strong></td>
         <td class="text-center"><span class="${st.cls}">${st.texto}</span></td>
         <td class="text-center">${btn}</td>
       </tr>`;
@@ -105,10 +105,10 @@ function renderLogs() {
             ? "jcpag-badge jcpag-badge--ok"
             : "jcpag-badge";
       return `<tr>
-        <td class="text-slate-500 whitespace-nowrap">${JCPag.formatarDataHora(log.data)}</td>
+        <td style="color: var(--jc-muted); white-space: nowrap;">${JCPag.formatarDataHora(log.data)}</td>
         <td><span class="${badgeCls}">${log.autor}</span></td>
-        <td class="font-bold">${log.acao}</td>
-        <td class="text-slate-500">${log.detalhes || "—"}</td>
+        <td><strong>${log.acao}</strong></td>
+        <td style="color: var(--jc-muted)">${log.detalhes || "—"}</td>
       </tr>`;
     })
     .join("");

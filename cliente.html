@@ -3,34 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>JC Soluções — Meu Painel</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link rel="stylesheet" href="css/jcpag-theme.css?v=6">
+  <link rel="stylesheet" href="css/jcpag-theme.css?v=7">
 </head>
 <body class="jcpag-body">
 
   <header class="jcpag-header">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="jcpag-logo-icon jcpag-logo-icon--client">
-          <i class="ph-fill ph-user text-lg text-white"></i>
+    <div class="jcpag-header-inner">
+      <div class="jcpag-brand">
+        <div class="jcpag-brand-icon jcpag-brand-icon--client">
+          <i class="ph-fill ph-user"></i>
         </div>
-        <h1 class="jcpag-header-title">JC Soluções <span class="jcpag-header-sub">Meu Painel</span></h1>
+        <h1 class="jcpag-brand-text">JC Soluções<span class="jcpag-brand-tag">Meu Painel</span></h1>
       </div>
 
-      <div class="jcpag-user-chip">
-        <div class="flex flex-col items-end leading-tight min-w-0">
-          <span id="cliente-nome" class="text-xs font-bold text-slate-800 truncate max-w-[130px]">Carregando…</span>
-          <span id="cliente-sessao-status" class="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
+      <div class="jcpag-user-bar">
+        <div class="jcpag-user-info">
+          <span id="cliente-nome" class="jcpag-user-name">Carregando…</span>
+          <span id="cliente-sessao-status" class="jcpag-user-status">
             <span class="jcpag-status-dot"></span>Sessão ativa
           </span>
         </div>
         <div id="cliente-avatar" class="jcpag-avatar jcpag-avatar--client" aria-hidden="true">—</div>
-        <button id="btn-sair" type="button" class="jcpag-btn-logout">
-          <i class="ph-bold ph-sign-out"></i><span>Sair</span>
+        <button id="btn-sair" type="button" class="jcpag-btn jcpag-btn-outline jcpag-btn-sm">
+          <i class="ph-bold ph-sign-out"></i> Sair
         </button>
       </div>
     </div>
@@ -38,23 +37,23 @@
 
   <main class="jcpag-main">
     <section class="jcpag-kpi-grid">
-      <div class="jcpag-kpi jcpag-animate" style="--jc-kpi-accent: var(--jc-ink);">
+      <div class="jcpag-kpi">
         <p class="jcpag-kpi-label">Total em aberto</p>
-        <h3 id="dash-total-debt" class="jcpag-kpi-value">R$ 0,00</h3>
+        <p id="dash-total-debt" class="jcpag-kpi-value">R$ 0,00</p>
       </div>
-      <div class="jcpag-kpi jcpag-animate jcpag-animate-d1" style="--jc-kpi-accent: var(--jc-gold); --jc-kpi-color: #b45309;">
+      <div class="jcpag-kpi">
         <p class="jcpag-kpi-label">Próximo vencimento</p>
-        <h3 id="dash-next-due" class="jcpag-kpi-value text-lg">—</h3>
+        <p id="dash-next-due" class="jcpag-kpi-value jcpag-kpi-value--sm">—</p>
       </div>
-      <div class="jcpag-kpi jcpag-animate jcpag-animate-d2" style="--jc-kpi-accent: var(--jc-success); --jc-kpi-color: var(--jc-success);">
+      <div class="jcpag-kpi">
         <p class="jcpag-kpi-label">Status do plano</p>
-        <h3 id="dash-status" class="jcpag-kpi-value text-lg">—</h3>
+        <p id="dash-status" class="jcpag-kpi-value jcpag-kpi-value--sm">—</p>
       </div>
     </section>
 
-    <section class="jcpag-section jcpag-animate jcpag-animate-d2">
+    <section class="jcpag-section">
       <h2 class="jcpag-section-title"><i class="ph-bold ph-clipboard-text"></i> Meus contratos</h2>
-      <div class="overflow-x-auto">
+      <div class="jcpag-table-wrap">
         <table class="jcpag-table">
           <thead>
             <tr><th>Serviço</th><th>Início</th><th class="text-right">Valor total</th><th class="text-center">Status</th></tr>
@@ -64,9 +63,9 @@
       </div>
     </section>
 
-    <section class="jcpag-section jcpag-animate jcpag-animate-d3">
+    <section class="jcpag-section">
       <h2 class="jcpag-section-title"><i class="ph-bold ph-receipt"></i> Faturas e boletos</h2>
-      <div class="overflow-x-auto">
+      <div class="jcpag-table-wrap">
         <table class="jcpag-table">
           <thead>
             <tr><th>Parcela</th><th>Vencimento</th><th class="text-right">Valor</th><th class="text-center">Status</th><th class="text-center">Ação</th></tr>
@@ -80,57 +79,55 @@
   <div id="toast" class="jcpag-toast hidden"></div>
 
   <dialog id="modal-pix" class="jcpag-dialog">
-    <div class="jcpag-dialog-body space-y-5">
-      <div class="text-center">
-        <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-          <i class="ph-fill ph-qr-code text-emerald-600 text-2xl"></i>
+    <div class="jcpag-dialog-body">
+      <div style="text-align: center; margin-bottom: 1rem;">
+        <div style="width: 48px; height: 48px; margin: 0 auto 0.75rem; background: var(--jc-success-soft); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--jc-success); font-size: 1.35rem;">
+          <i class="ph-fill ph-qr-code"></i>
         </div>
-        <h3 class="jcpag-display text-xl font-bold">Pagamento via Pix</h3>
-        <p class="text-sm text-slate-500 mt-1">Use os dados abaixo para pagar</p>
+        <h3 class="jcpag-dialog-title" style="margin-bottom: 0.25rem;">Pagamento via Pix</h3>
+        <p style="font-size: 0.8125rem; color: var(--jc-muted); margin: 0;">Use os dados abaixo para pagar</p>
       </div>
 
-      <div class="jcpag-pix-box space-y-3 text-sm">
-        <div class="flex justify-between gap-3">
-          <span class="text-slate-500 font-semibold">Parcela</span>
-          <span id="pix-parcela" class="font-bold text-right">—</span>
+      <div class="jcpag-pix-box">
+        <div class="jcpag-pix-row">
+          <span class="jcpag-pix-label">Parcela</span>
+          <span id="pix-parcela" class="jcpag-pix-value">—</span>
         </div>
-        <div class="flex justify-between gap-3">
-          <span class="text-slate-500 font-semibold">Valor</span>
-          <span id="pix-valor" class="font-extrabold text-emerald-600 text-lg">—</span>
+        <div class="jcpag-pix-row">
+          <span class="jcpag-pix-label">Valor</span>
+          <span id="pix-valor" class="jcpag-pix-value jcpag-pix-value--lg">—</span>
         </div>
-        <hr class="border-emerald-200">
-        <div>
-          <p class="jcpag-label mb-1">Pix · E-mail</p>
-          <p id="pix-email" class="font-bold break-all">—</p>
+        <hr class="jcpag-pix-divider">
+        <div class="jcpag-pix-row"><span class="jcpag-pix-label">Pix · E-mail</span></div>
+        <p id="pix-email" style="font-weight: 600; word-break: break-all; margin: 0 0 0.65rem;">—</p>
+        <div class="jcpag-pix-row">
+          <span class="jcpag-pix-label">Banco</span>
+          <span id="pix-banco" class="jcpag-pix-value">—</span>
         </div>
-        <div>
-          <p class="jcpag-label mb-1">Banco</p>
-          <p id="pix-banco" class="font-bold">—</p>
-        </div>
-        <div>
-          <p class="jcpag-label mb-1">Nome</p>
-          <p id="pix-nome" class="font-bold">—</p>
+        <div class="jcpag-pix-row">
+          <span class="jcpag-pix-label">Nome</span>
+          <span id="pix-nome" class="jcpag-pix-value">—</span>
         </div>
       </div>
 
-      <p class="text-xs text-slate-500 text-center">Após pagar, envie o comprovante para a JC Soluções.</p>
+      <p class="jcpag-footnote">Após pagar, envie o comprovante para a JC Soluções.</p>
 
-      <div class="flex gap-2">
-        <button type="button" id="btn-copiar-pix" class="jcpag-btn-ghost flex-1 flex items-center justify-center gap-2">
+      <div class="jcpag-dialog-actions">
+        <button type="button" id="btn-copiar-pix" class="jcpag-btn jcpag-btn-outline">
           <i class="ph-bold ph-copy"></i> Copiar e-mail
         </button>
-        <button type="button" id="btn-fechar-pix" class="jcpag-btn-primary jcpag-btn-teal !w-auto flex-1">Fechar</button>
+        <button type="button" id="btn-fechar-pix" class="jcpag-btn jcpag-btn-accent">Fechar</button>
       </div>
     </div>
   </dialog>
 
-  <script src="config.example.js?v=6"></script>
-  <script src="config.local.js?v=6"></script>
-  <script src="js/security/crypto.js?v=6"></script>
-  <script src="js/security/auth.js?v=6"></script>
-  <script src="js/security/guard.js?v=6"></script>
-  <script src="js/core/store.js?v=6"></script>
-  <script src="js/core/dados.js?v=6"></script>
-  <script src="js/app/cliente-app.js?v=6"></script>
+  <script src="config.example.js?v=7"></script>
+  <script src="config.local.js?v=7"></script>
+  <script src="js/security/crypto.js?v=7"></script>
+  <script src="js/security/auth.js?v=7"></script>
+  <script src="js/security/guard.js?v=7"></script>
+  <script src="js/core/store.js?v=7"></script>
+  <script src="js/core/dados.js?v=7"></script>
+  <script src="js/app/cliente-app.js?v=7"></script>
 </body>
 </html>
