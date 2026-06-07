@@ -205,7 +205,17 @@ window.JCPag = (function () {
     if (!sessao || sessao.role !== "cliente") return null;
     await init();
     const c = getCliente(sessao.clienteId);
-    return c?.ativo ? c : null;
+    if (c?.ativo) return c;
+    if (sessao.nome) {
+      return {
+        id: sessao.clienteId,
+        nome: sessao.nome,
+        email: "",
+        ativo: true,
+        _sessaoOrfa: true,
+      };
+    }
+    return null;
   }
 
   // ===== ADMIN (exige sessão admin validada) =====

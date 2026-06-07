@@ -16,22 +16,31 @@ function iniciais(nome) {
     .join("");
 }
 
-function setupHeader(cliente) {
-  const primeiro = cliente.nome.split(" ")[0];
-  document.getElementById("cliente-nome").textContent = "Olá, " + primeiro;
-  document.getElementById("cliente-avatar").textContent = iniciais(cliente.nome);
+function setupHeader(nome) {
+  const display = String(nome || "Cliente").trim();
+  const primeiro = display.split(" ").filter(Boolean)[0] || "Cliente";
+  const nomeEl = document.getElementById("cliente-nome");
+  const avatarEl = document.getElementById("cliente-avatar");
+  if (nomeEl) nomeEl.textContent = "Olá, " + primeiro;
+  if (avatarEl) avatarEl.textContent = iniciais(display);
 }
 
-async function renderDashboard() {
+async function renderDashboard(sessao) {
   const cliente = await JCPag.getClienteLogado();
   if (!cliente) {
-    await JCPag.logout();
+    alert(
+      "Sessão inválida. Faça login novamente ou entre em contato com a JC Soluções.",
+    );
+    await JCPag.logout("Cliente não encontrado na base");
     return;
   }
 
-  setupHeader(cliente);
+  setupHeader(cliente.nome || sessao?.nome);
 
-  await JCPag.init();
+  if (cliente._sessaoOrfa) {
+    toast("Seu cadastro não está na base de dados. Entre em contato com a JC Soluções.");
+  }
+
   const contratos = JCPag.contratosDoCliente(cliente.id);
   const parcelas = JCPag.parcelasDoCliente(cliente.id);
   const pix = JCPag.cfg().PIX;
@@ -60,11 +69,12 @@ async function renderDashboard() {
       </tr>`,
         )
         .join("")
-    : '<tr><td colspan="4" class="py-4 text-center text-slate-400">Nenhum contrato ativo.</td></tr>';
+    : '<tr><td colspan="4" class="py-6 text-center text-slate-400">Nenhum contrato vinculado à sua conta.</td></tr>';
 
   const tbodyPag = document.getElementById("payments-table-body");
   if (!parcelas.length) {
-    tbodyPag.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">Nenhuma fatura.</td></tr>';
+    tbodyPag.innerHTML =
+      '<tr><td colspan="5" class="py-6 text-center text-slate-400">Nenhuma fatura disponível no momento.</td></tr>';
     return;
   }
 
@@ -112,9 +122,10 @@ async function renderDashboard() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  let sessao;
   try {
     await JCPag.init();
-    const sessao = await JCPag.guard.exigirCliente();
+    sessao = await JCPag.guard.exigirCliente();
     if (!sessao) return;
   } catch (e) {
     alert(e.message);
@@ -122,7 +133,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  await renderDashboard();
+  if (sessao.nome) setupHeader(sessao.nome);
+
+  try {
+    await renderDashboard(sessao);
+  } catch (e) {
+    console.error("[ClienteApp]", e);
+    toast("Erro ao carregar seu painel. Tente atualizar a página.");
+  }
 
   document.getElementById("btn-fechar-pix").addEventListener("click", () => {
     document.getElementById("modal-pix").close();
