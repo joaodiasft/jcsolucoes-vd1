@@ -7,9 +7,9 @@ Portal de gestão de clientes, contratos e parcelas com login por token, dados c
 ```
 sistemapagamentos/
 ├── index.html          # Login
-├── admin.html          # Painel administrativo
+├── admin.html          # Painel de gestão (acesso restrito)
 ├── cliente.html        # Portal do cliente
-├── config.example.js   # Configuração demo (commitar)
+├── config.example.js   # Configuração base (commitar)
 ├── config.local.js     # Segredos locais (NÃO commitar)
 ├── js/security/        # ⚠️ NÃO EDITAR — criptografia e auth
 ├── js/core/            # Store criptografado + API
@@ -38,27 +38,23 @@ sistemapagamentos/
    - `STORAGE_SECRET` (mín. 32 caracteres)
    - `SESSION_PEPPER`
    - `TOKEN_PEPPER`
-3. Gere hash do token admin:
+3. Gere hash do token de gestão:
    ```bash
-   node scripts/hash-token.js SEU_TOKEN_ADMIN
+   node scripts/hash-token.js SEU_TOKEN
    ```
    Cole o hash em `ADMIN_TOKEN_HASH` no `config.local.js`
-4. Defina `DEMO_MODE: false`
-5. Remova ou esvazie `TOKENS_DEMO`
-6. **Nunca** commite `config.local.js`
+4. **Nunca** commite `config.local.js` nem exponha tokens na interface
 
-## Tokens de acesso
+## Acesso
 
-| Perfil | Token |
-|--------|-------|
-| **Admin** | `jcsolucoes2026` |
-| **Cliente demo** | `USER001` (somente com `DEMO_MODE: true`) |
+- **Gestão:** token configurado via `ADMIN_TOKEN_HASH` (somente o responsável)
+- **Cliente:** token gerado ao cadastrar no painel de gestão (exibido uma vez ao criar)
 
-Na primeira execução com `DEMO_MODE: true`, dados fictícios são criados automaticamente.
+Na primeira execução a base inicia vazia. Cadastre clientes pelo painel de gestão.
 
 ## Reset do sistema
 
-No painel admin, botão **Reset** zera a base criptografada.  
+No painel de gestão, botão **Reset** zera a base criptografada.  
 Ou limpe no navegador: DevTools → Application → Local Storage.
 
 ## GitHub Pages

@@ -51,7 +51,7 @@ Leia `js/security/LEIA-ME.txt`.
 
 | Arquivo | Commitar? | Função |
 |---------|-----------|--------|
-| `config.example.js` | ✅ Sim | Valores demo documentados |
+| `config.example.js` | ✅ Sim | Configuração base documentada |
 | `config.local.js` | ❌ Não | Segredos de produção (`.gitignore`) |
 | `config.local.example.js` | ✅ Sim | Modelo vazio |
 
@@ -60,10 +60,9 @@ Leia `js/security/LEIA-ME.txt`.
 ## Checklist antes de publicar no GitHub
 
 - [ ] `config.local.js` está no `.gitignore`
-- [ ] `DEMO_MODE: false` em produção
 - [ ] `STORAGE_SECRET`, `SESSION_PEPPER`, `TOKEN_PEPPER` únicos e longos
 - [ ] `ADMIN_TOKEN_HASH` gerado com `node scripts/hash-token.js`
-- [ ] Tokens demo removidos da UI
+- [ ] Nenhum token ou atalho de acesso exposto na interface
 - [ ] Repositório **público** não contém e-mails/chaves Pix reais se forem sensíveis
 
 ---

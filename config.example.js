@@ -1,50 +1,30 @@
 /**
- * Configuração de exemplo — COMMITAR NO GITHUB
+ * Configuração do sistema — COMMITAR NO GITHUB
  *
- * ANTES DE PRODUÇÃO:
- *   1. Copie: cp config.local.example.js config.local.js
- *   2. Altere TODOS os valores marcados com ALTERAR em config.local.js
- *   3. Gere hashes:         node scripts/hash-token.js SEU_TOKEN
- *   4. Defina DEMO_MODE: false em config.local.js
- *
- * config.local.js está no .gitignore e NÃO deve ser enviado ao GitHub.
+ * Segredos sensíveis: copie config.local.example.js → config.local.js (gitignore)
+ * Hash de token admin: node scripts/hash-token.js SEU_TOKEN
  */
 window.JCPAG_CONFIG = {
-  /** true = exibe tokens de demo e popula dados fictícios na 1ª execução */
-  DEMO_MODE: true,
+  /** Chave de criptografia localStorage (mín. 32 caracteres) */
+  STORAGE_SECRET: "jc-prod-storage-secret-32chars-min!!",
 
-  /** ALTERAR — mínimo 32 caracteres. Usado para criptografar localStorage (AES-256-GCM) */
-  STORAGE_SECRET: "jc-demo-storage-secret-32chars-min!!",
+  /** Assinatura HMAC das sessões */
+  SESSION_PEPPER: "jc-prod-session-pepper-2026!!",
 
-  /** ALTERAR — assinatura HMAC das sessões */
-  SESSION_PEPPER: "jc-demo-session-pepper-2026!!",
+  /** Pepper para hash dos tokens de login */
+  TOKEN_PEPPER: "jc-prod-pepper-jcsolucoes-2026",
 
-  /** ALTERAR — hash SHA-256 dos tokens de login (token + pepper) */
-  TOKEN_PEPPER: "jc-demo-pepper-change-in-production-2026",
-
-  /** Nome exibido do administrador */
+  /** Nome exibido do administrador (após login) */
   ADMIN_NOME: "João Claudio",
 
-  /**
-   * Hash do token admin — token: jcsolucoes2026
-   * Gere novo hash: node scripts/hash-token.js SEU_TOKEN
-   */
-  ADMIN_TOKEN_HASH: "41d5bb10837fe115d5b02095e3ed9740c7a16a265c6ee25356ca19f42bcb062d",
+  /** Hash SHA-256 do token admin — gere com scripts/hash-token.js */
+  ADMIN_TOKEN_HASH: "b92b94c0760e76250b8bce74b4118aff2e9d4fa1bfb65f6588789f88c8214670",
 
-  /** Dados Pix — exibidos ao cliente ao pagar */
+  /** Dados Pix exibidos ao cliente */
   PIX: {
     tipo: "E-mail",
     email: "jcsolucoesgo@gmail.com",
     banco: "Sicoob",
     nome: "João Claudio",
-  },
-
-  /**
-   * Somente visível na UI quando DEMO_MODE === true
-   * Em produção, remova ou deixe vazio e não exiba na tela de login
-   */
-  TOKENS_DEMO: {
-    admin: { token: "jcsolucoes2026", label: "Administrador JC Soluções" },
-    cliente: { token: "USER001", label: "João Silva (cliente demo)" },
   },
 };

@@ -1,5 +1,5 @@
 /**
- * Tela de login — usa apenas JCPag.login() (validação no núcleo)
+ * Tela de login — produção (sem atalhos ou indicação de perfil)
  */
 "use strict";
 
@@ -13,31 +13,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     return;
   }
 
-  const demoBox = document.getElementById("demo-box");
-  if (demoBox && JCPag.cfg().DEMO_MODE && JCPag.cfg().TOKENS_DEMO) {
-    demoBox.classList.remove("hidden");
-    const demo = JCPag.cfg().TOKENS_DEMO;
-    document.getElementById("demo-admin-token").textContent = demo.admin.token;
-    document.getElementById("demo-cliente-token").textContent = demo.cliente.token;
-  }
-
-  if (JCPag.cfg().DEMO_MODE) {
-    document.getElementById("banner-demo")?.classList.remove("hidden");
-  }
-
   async function entrar(token) {
     const btn = document.getElementById("btn-login");
     const btnText = document.getElementById("btn-text");
     const erro = document.getElementById("login-erro");
 
     btn.disabled = true;
-    btnText.textContent = "Validando token...";
+    btnText.textContent = "Validando...";
     erro.classList.add("hidden");
 
     const result = await JCPag.login(token);
     if (!result.ok) {
       btn.disabled = false;
-      btnText.textContent = "Entrar no sistema";
+      btnText.textContent = "Entrar";
       erro.textContent = result.erro;
       erro.classList.remove("hidden");
       return;
@@ -48,15 +36,5 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("login-form").addEventListener("submit", function (e) {
     e.preventDefault();
     entrar(document.getElementById("token").value);
-  });
-
-  document.querySelectorAll("[data-demo]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      const role = btn.dataset.demo;
-      const demo = JCPag.cfg().TOKENS_DEMO?.[role];
-      if (!demo) return;
-      document.getElementById("token").value = demo.token;
-      entrar(demo.token);
-    });
   });
 });

@@ -160,10 +160,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  if (JCPag.cfg().DEMO_MODE) {
-    document.getElementById("banner-demo")?.classList.remove("hidden");
-  }
-
   document.getElementById("venda-vencimento").value = JCPag.hoje();
   await renderTudo();
 

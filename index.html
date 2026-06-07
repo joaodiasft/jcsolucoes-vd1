@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>JC Soluções - Acesso por Token</title>
+  <title>JC Soluções - Entrar</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,50 +18,31 @@
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-  <div id="banner-demo" class="hidden fixed top-0 inset-x-0 z-50 bg-amber-500 text-amber-950 text-center text-xs font-bold py-2 px-4">
-    MODO DEMO — Não use em produção. Leia SECURITY.md antes de publicar.
-  </div>
-
-  <div class="glass w-full max-w-md rounded-3xl shadow-2xl border border-white/50 p-8 space-y-8 mt-8">
+  <div class="glass w-full max-w-md rounded-3xl shadow-2xl border border-white/50 p-8 space-y-8">
     <div class="text-center">
       <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
         <i class="ph-fill ph-fingerprint text-white text-3xl"></i>
       </div>
       <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">JC Soluções</h1>
-      <p class="text-slate-500 text-sm font-medium mt-1">Acesso protegido por token</p>
+      <p class="text-slate-500 text-sm font-medium mt-1">Digite seu token de acesso</p>
     </div>
 
     <form id="login-form" class="space-y-6" autocomplete="off">
       <div class="space-y-2">
-        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Token de acesso</label>
-        <input required type="password" id="token" maxlength="32" autocomplete="off"
-          class="w-full px-4 py-4 rounded-2xl border border-slate-200 bg-white/60 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-bold text-lg text-center tracking-widest text-slate-700 uppercase"
+        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Token</label>
+        <input required type="password" id="token" maxlength="64" autocomplete="off"
+          class="w-full px-4 py-4 rounded-2xl border border-slate-200 bg-white/60 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium text-base text-center text-slate-700"
           placeholder="••••••••">
       </div>
       <p id="login-erro" class="hidden text-sm font-semibold text-rose-600 text-center"></p>
       <button type="submit" id="btn-login" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all">
-        <span id="btn-text">Entrar no sistema</span>
+        <span id="btn-text">Entrar</span>
       </button>
     </form>
 
-    <div id="demo-box" class="hidden rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 p-4 space-y-3">
-      <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Tokens de demonstração</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <button type="button" data-demo="admin" class="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-3 text-left hover:bg-indigo-100">
-          <p class="text-[10px] font-bold text-indigo-600 uppercase">Administrador</p>
-          <p id="demo-admin-token" class="font-bold text-slate-800 mt-0.5">—</p>
-        </button>
-        <button type="button" data-demo="cliente" class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-left hover:bg-emerald-100">
-          <p class="text-[10px] font-bold text-emerald-600 uppercase">Cliente demo</p>
-          <p id="demo-cliente-token" class="font-bold text-slate-800 mt-0.5">—</p>
-        </button>
-      </div>
-    </div>
-
-    <p class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dados criptografados · Sessão assinada</p>
+    <p class="text-center text-[10px] text-slate-400">Problemas no acesso? Entre em contato com a JC Soluções.</p>
   </div>
 
-  <!-- ORDEM OBRIGATÓRIA — NÃO ALTERAR (ver js/security/LEIA-ME.txt) -->
   <script src="config.example.js"></script>
   <script src="config.local.js"></script>
   <script src="js/security/crypto.js"></script>

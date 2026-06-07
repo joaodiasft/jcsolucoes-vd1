@@ -14,7 +14,7 @@ if (!token) {
 
 const pepper =
   process.env.TOKEN_PEPPER ||
-  "jc-demo-pepper-change-in-production-2026";
+  "jc-prod-pepper-jcsolucoes-2026";
 
 const normalized = String(token).toUpperCase().replace(/[^A-Z0-9]/g, "");
 const hash = crypto.createHash("sha256").update(normalized + pepper).digest("hex");

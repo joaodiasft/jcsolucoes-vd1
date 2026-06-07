@@ -4,7 +4,6 @@
  * config.local.js está no .gitignore.
  */
 Object.assign(window.JCPAG_CONFIG, {
-  // DEMO_MODE: false,
   // STORAGE_SECRET: "sua-chave-secreta-com-minimo-32-caracteres!!",
   // SESSION_PEPPER: "seu-pepper-sessao-unico!!",
   // TOKEN_PEPPER: "seu-pepper-token-unico!!",

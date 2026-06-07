@@ -51,82 +51,18 @@ window.JCPag = (function () {
     });
   }
 
-  async function seedDemo() {
-    const tokenCliente1 = cfg().TOKENS_DEMO?.cliente?.token || "USER001";
-    const hash1 = await JCPagAuth.hashToken(tokenCliente1);
-    const hash2 = await JCPagAuth.hashToken("USER002");
-
-    const c1 = {
-      id: uid(),
-      nome: "João Silva",
-      email: "joao.silva@email.com",
-      telefone: "(11) 98765-4321",
-      tokenHash: hash1,
-      tokenPreview: JCPagAuth.tokenPreview(tokenCliente1),
-      ativo: true,
-      criadoEm: hoje(),
-    };
-    const c2 = {
-      id: uid(),
-      nome: "Maria Santos",
-      email: "maria.santos@email.com",
-      telefone: "(11) 91234-5678",
-      tokenHash: hash2,
-      tokenPreview: JCPagAuth.tokenPreview("USER002"),
-      ativo: true,
-      criadoEm: hoje(),
-    };
-
-    const contrato1 = {
-      id: uid(),
-      clienteId: c1.id,
-      servico: "Consultoria Dev Senior",
-      dataInicio: "2026-01-01",
-      status: "ativo",
-      valorTotal: 9000,
-      parcelas: 6,
-      criadoEm: hoje(),
-    };
-
-    const parcelas = [];
-    const base = new Date("2026-02-15T12:00:00");
-    for (let i = 0; i < 6; i++) {
-      const venc = new Date(base);
-      venc.setMonth(venc.getMonth() + i);
-      const vencimento = venc.toISOString().slice(0, 10);
-      let status = "pendente";
-      if (i < 2) status = "pago";
-      parcelas.push({
-        id: uid(),
-        contratoId: contrato1.id,
-        clienteId: c1.id,
-        numero: i + 1,
-        vencimento,
-        valor: 1500,
-        status,
-        pagoEm: status === "pago" ? vencimento : null,
-      });
-    }
-
-    store.clientes = [c1, c2];
-    store.contratos = [contrato1];
-    store.parcelas = parcelas;
-    store.logs = [];
-    store.inicializado = true;
-    await persistir();
-  }
-
   async function init() {
     if (ready) return store;
     if (initPromise) return initPromise;
 
     initPromise = (async () => {
       if (!window.JCPAG_CONFIG) {
-        throw new Error("JCPAG_CONFIG não carregado. Inclua config.example.js ou config.js antes dos scripts.");
+        throw new Error("JCPAG_CONFIG não carregado. Inclua config.example.js antes dos scripts.");
       }
       store = await JCPagStore.carregar();
-      if (!store.inicializado && cfg().DEMO_MODE) {
-        await seedDemo();
+      if (!store.inicializado) {
+        store.inicializado = true;
+        await persistir(false);
       }
       sincronizarAtrasos();
       ready = true;
@@ -413,11 +349,8 @@ window.JCPag = (function () {
   async function resetarSistema() {
     await exigirSessaoAdmin();
     store = await JCPagStore.resetar();
-    if (cfg().DEMO_MODE) await seedDemo();
-    else {
-      store.inicializado = true;
-      await persistir();
-    }
+    store.inicializado = true;
+    await persistir(false);
     await registrarLog("Sistema resetado", "Base zerada pelo administrador", getAutorAdmin());
     return store;
   }
