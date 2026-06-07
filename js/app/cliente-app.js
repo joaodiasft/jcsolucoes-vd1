@@ -7,19 +7,34 @@ function toast(msg) {
   setTimeout(() => el.classList.add("hidden"), 3500);
 }
 
+function iniciais(nome) {
+  return (nome || "C")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
+}
+
+function setupHeader(cliente) {
+  const primeiro = cliente.nome.split(" ")[0];
+  document.getElementById("cliente-nome").textContent = "Olá, " + primeiro;
+  document.getElementById("cliente-avatar").textContent = iniciais(cliente.nome);
+}
+
 async function renderDashboard() {
   const cliente = await JCPag.getClienteLogado();
   if (!cliente) {
-    JCPag.logout();
+    await JCPag.logout();
     return;
   }
+
+  setupHeader(cliente);
 
   await JCPag.init();
   const contratos = JCPag.contratosDoCliente(cliente.id);
   const parcelas = JCPag.parcelasDoCliente(cliente.id);
   const pix = JCPag.cfg().PIX;
-
-  document.getElementById("user-name").textContent = "Olá, " + cliente.nome.split(" ")[0];
 
   const aberto = parcelas.filter((p) => p.status !== "pago");
   const totalAberto = aberto.reduce((s, p) => s + p.valor, 0);
@@ -117,5 +132,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     navigator.clipboard.writeText(JCPag.cfg().PIX.email).then(() => toast("E-mail Pix copiado!"));
   });
 
-  document.getElementById("btn-sair").addEventListener("click", () => JCPag.logout());
+  document.getElementById("btn-sair").addEventListener("click", async () => {
+    if (!confirm("Deseja encerrar sua sessão e voltar ao login?")) return;
+    await JCPag.logout("Logout manual");
+  });
 });

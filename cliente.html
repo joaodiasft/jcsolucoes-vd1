@@ -23,10 +23,18 @@
       </div>
       <h1 class="font-extrabold text-xl tracking-tight">JC Soluções <span class="text-slate-400 font-medium text-sm ml-2">Painel do Cliente</span></h1>
     </div>
-    <div class="flex items-center gap-4">
-      <span class="hidden md:inline text-sm font-semibold text-slate-600" id="user-name">Carregando...</span>
-      <button id="btn-sair" class="p-2 hover:bg-slate-100 rounded-lg text-slate-500" title="Sair">
-        <i class="ph-bold ph-sign-out"></i>
+    <div class="flex items-center gap-2 sm:gap-3 bg-white/70 border border-slate-200 rounded-2xl pl-3 pr-2 py-1.5 shadow-sm">
+      <div class="hidden md:flex flex-col items-end leading-tight min-w-0">
+        <span id="cliente-nome" class="text-sm font-bold text-slate-800 truncate max-w-[140px]">Carregando…</span>
+        <span class="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          Sessão ativa
+        </span>
+      </div>
+      <div id="cliente-avatar" class="w-9 h-9 shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-emerald-500/30" aria-hidden="true">—</div>
+      <button id="btn-sair" type="button" class="group flex items-center gap-2 bg-slate-900 hover:bg-black active:scale-[0.98] text-white pl-3 pr-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-slate-900/15 transition-all">
+        <i class="ph-bold ph-sign-out text-base group-hover:-translate-x-0.5 transition-transform"></i>
+        <span>Sair</span>
       </button>
     </div>
   </header>
