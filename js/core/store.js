@@ -30,10 +30,12 @@ window.JCPagStore = (function () {
         if (!data.v) throw new Error("Versão inválida");
         return data;
       } catch (e) {
-        console.error("[JCPagStore] Falha ao descriptografar:", e.message);
-        throw new Error(
-          "Não foi possível ler os dados criptografados. Verifique STORAGE_SECRET em config.js",
+        console.warn(
+          "[JCPagStore] Dados incompatíveis ou corrompidos — base será reiniciada.",
+          e.message,
         );
+        localStorage.removeItem(STORAGE_KEY);
+        return storeVazio();
       }
     }
 
