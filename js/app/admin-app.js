@@ -191,8 +191,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const stats = await JCPag.sincronizarBanco();
       toast(
         stats.changed
-          ? `Banco atualizado · ${stats.ativos} login(s) ativo(s)`
-          : `Banco OK · ${stats.ativos} login(s) ativo(s)`,
+          ? `Nuvem atualizada · ${stats.ativos} login(s) ativo(s)`
+          : `Banco na nuvem OK · ${stats.ativos} login(s) ativo(s)`,
       );
       await renderTudo();
     } catch (e) {

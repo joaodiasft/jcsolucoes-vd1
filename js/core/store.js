@@ -1,7 +1,6 @@
 /**
  * ============================================================================
- * JCPag — Armazenamento criptografado
- * Único ponto de leitura/gravação de dados persistentes.
+ * JCPag — Armazenamento (local legado ou Supabase produção)
  * ============================================================================
  */
 "use strict";
@@ -9,6 +8,15 @@
 window.JCPagStore = (function () {
   const STORAGE_KEY = "jc-pag-encrypted-v2";
   const LEGACY_KEY = "jc-pagamentos-v1";
+
+  function cfg() {
+    return window.JCPAG_CONFIG || {};
+  }
+
+  function usaSupabase() {
+    const c = cfg();
+    return c.STORAGE_BACKEND === "supabase" && c.SUPABASE_URL && c.SUPABASE_ANON_KEY;
+  }
 
   function storeVazio() {
     return {
@@ -21,24 +29,83 @@ window.JCPagStore = (function () {
     };
   }
 
+  function headersSupabase(extra = {}) {
+    const key = cfg().SUPABASE_ANON_KEY;
+    return {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+      ...extra,
+    };
+  }
+
+  async function carregarSupabase() {
+    const base = cfg().SUPABASE_URL.replace(/\/$/, "");
+    const res = await fetch(`${base}/rest/v1/jcpag_snapshot?id=eq.1&select=data`, {
+      headers: headersSupabase(),
+    });
+
+    if (!res.ok) {
+      const msg = await res.text();
+      throw new Error(`Não foi possível carregar o banco remoto (${res.status}). ${msg}`);
+    }
+
+    const rows = await res.json();
+    if (!rows.length || !rows[0].data) return storeVazio();
+
+    const data = rows[0].data;
+    if (!data.v) throw new Error("Versão inválida no banco remoto.");
+    if (!data.clientes) data.clientes = [];
+    if (!data.contratos) data.contratos = [];
+    if (!data.parcelas) data.parcelas = [];
+    if (!data.logs) data.logs = [];
+    return data;
+  }
+
+  async function salvarSupabase(data) {
+    const base = cfg().SUPABASE_URL.replace(/\/$/, "");
+    data.v = 2;
+    const res = await fetch(`${base}/rest/v1/jcpag_snapshot?id=eq.1`, {
+      method: "PATCH",
+      headers: headersSupabase({ Prefer: "return=minimal" }),
+      body: JSON.stringify({
+        data,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+
+    if (!res.ok) {
+      const msg = await res.text();
+      throw new Error(`Não foi possível salvar no banco remoto (${res.status}). ${msg}`);
+    }
+
+    return data;
+  }
+
+  async function resetarSupabase() {
+    const vazio = storeVazio();
+    await salvarSupabase(vazio);
+    return vazio;
+  }
+
   function storageSecrets() {
-    const cfg = window.JCPAG_CONFIG || {};
-    const list = [cfg.STORAGE_SECRET, ...(cfg.LEGACY_STORAGE_SECRETS || [])];
+    const c = cfg();
+    const list = [c.STORAGE_SECRET, ...(c.LEGACY_STORAGE_SECRETS || [])];
     return [...new Set(list.filter((s) => typeof s === "string" && s.length >= 32))];
   }
 
   async function decryptWithSecret(raw, secret) {
-    const cfg = window.JCPAG_CONFIG;
-    const anterior = cfg.STORAGE_SECRET;
-    cfg.STORAGE_SECRET = secret;
+    const c = cfg();
+    const anterior = c.STORAGE_SECRET;
+    c.STORAGE_SECRET = secret;
     try {
       return await JCPagCrypto.decrypt(raw);
     } finally {
-      cfg.STORAGE_SECRET = anterior;
+      c.STORAGE_SECRET = anterior;
     }
   }
 
-  async function carregar() {
+  async function carregarLocal() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const secrets = storageSecrets();
@@ -57,7 +124,7 @@ window.JCPagStore = (function () {
 
           if (secret !== chaveAtual) {
             console.info("[JCPagStore] Dados abertos com chave legada — migrando para chave atual.");
-            await salvar(data);
+            await salvarLocal(data);
           }
 
           return data;
@@ -79,7 +146,7 @@ window.JCPagStore = (function () {
     return storeVazio();
   }
 
-  async function salvar(data) {
+  async function salvarLocal(data) {
     data.v = 2;
     const json = JSON.stringify(data);
     const encrypted = await JCPagCrypto.encrypt(json);
@@ -87,7 +154,62 @@ window.JCPagStore = (function () {
     return data;
   }
 
+  function contarItens(data) {
+    return (
+      (data.clientes?.length || 0) +
+      (data.contratos?.length || 0) +
+      (data.parcelas?.length || 0) +
+      (data.logs?.length || 0)
+    );
+  }
+
+  async function migrarLocalParaNuvem(remoto) {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return remoto;
+
+    const secrets = storageSecrets();
+    for (const secret of secrets) {
+      try {
+        const json = await decryptWithSecret(raw, secret);
+        const local = JSON.parse(json);
+        if (!local?.v) continue;
+
+        const remotoQtd = contarItens(remoto);
+        const localQtd = contarItens(local);
+
+        if (localQtd > remotoQtd) {
+          console.info("[JCPagStore] Migrando dados locais para o banco remoto.");
+          await salvarSupabase(local);
+          return local;
+        }
+      } catch {
+        /* tenta próxima chave */
+      }
+    }
+
+    return remoto;
+  }
+
+  async function carregar() {
+    if (usaSupabase()) {
+      let remoto = await carregarSupabase();
+      remoto = await migrarLocalParaNuvem(remoto);
+      return remoto;
+    }
+    return carregarLocal();
+  }
+
+  async function salvar(data) {
+    if (usaSupabase()) {
+      return salvarSupabase(data);
+    }
+    return salvarLocal(data);
+  }
+
   async function resetar() {
+    if (usaSupabase()) {
+      return resetarSupabase();
+    }
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(LEGACY_KEY);
     return storeVazio();
@@ -96,6 +218,7 @@ window.JCPagStore = (function () {
   return Object.freeze({
     STORAGE_KEY,
     storeVazio,
+    usaSupabase,
     carregar,
     salvar,
     resetar,

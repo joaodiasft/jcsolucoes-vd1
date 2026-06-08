@@ -5,7 +5,15 @@
  * Hash de token admin: node scripts/hash-token.js SEU_TOKEN
  */
 window.JCPAG_CONFIG = {
-  /** Chave de criptografia localStorage (mín. 32 caracteres) */
+  /** local = navegador apenas | supabase = banco na nuvem (mesmos dados em qualquer aparelho) */
+  STORAGE_BACKEND: "supabase",
+
+  /** Supabase — projeto Jcsolucoes (sa-east-1) */
+  SUPABASE_URL: "https://wthdtoucdvlmsyvtbxul.supabase.co",
+  SUPABASE_ANON_KEY:
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0aGR0b3VjZHZsbXN5dnRieHVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NjI1NTgsImV4cCI6MjA5MzMzODU1OH0.MJA1dlJoxZ-YUkAFtesHFIwXH9Hl9DxkzxNjs15mKG0",
+
+  /** Chave de criptografia localStorage (fallback local / migração) */
   STORAGE_SECRET: "jc-prod-storage-secret-32chars-min!!",
 
   /** Chaves antigas — usadas só para abrir dados já salvos e migrar (não apaga) */
