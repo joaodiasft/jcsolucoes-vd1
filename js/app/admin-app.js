@@ -11,9 +11,36 @@ async function renderTudo() {
   await JCPag.init();
   renderKPIs();
   renderClientes();
+  renderContratos();
   renderFinanceiro();
   renderLogs();
   preencherSelectClientes();
+}
+
+function renderContratos() {
+  const tbody = document.getElementById("contracts-table-body");
+  const contratos = JCPag.dados.contratos || [];
+
+  if (!contratos.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="jcpag-empty">Nenhum contrato cadastrado. Use Nova venda.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = [...contratos]
+    .sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""))
+    .map((ct) => {
+      const cliente = JCPag.getCliente(ct.clienteId);
+      const qtdParcelas = JCPag.dados.parcelas.filter((p) => p.contratoId === ct.id).length;
+      return `<tr>
+        <td><strong>${cliente ? cliente.nome : "—"}</strong></td>
+        <td>${ct.servico}</td>
+        <td style="color: var(--jc-muted)">${JCPag.formatarData(ct.dataInicio)}</td>
+        <td class="text-center"><strong>${qtdParcelas || ct.parcelas || 0}</strong></td>
+        <td class="text-right"><strong>${JCPag.formatarMoeda(ct.valorTotal)}</strong></td>
+        <td class="text-center"><span class="jcpag-badge jcpag-badge--ok">${ct.status || "ativo"}</span></td>
+      </tr>`;
+    })
+    .join("");
 }
 
 function renderClientes() {

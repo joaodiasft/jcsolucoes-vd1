@@ -172,10 +172,56 @@ window.JCPag = (function () {
     return ajustes;
   }
 
+  function consolidarClientesDuplicados() {
+    let ajustes = 0;
+    const porPreview = new Map();
+
+    store.clientes.forEach((c) => {
+      if (!c.tokenPreview) return;
+      if (!porPreview.has(c.tokenPreview)) porPreview.set(c.tokenPreview, []);
+      porPreview.get(c.tokenPreview).push(c);
+    });
+
+    porPreview.forEach((lista) => {
+      if (lista.length < 2) return;
+
+      const manter = lista.reduce((melhor, atual) => {
+        const vMelhor = contarVinculosCliente(melhor.id);
+        const vAtual = contarVinculosCliente(atual.id);
+        if (vAtual > vMelhor) return atual;
+        if (vAtual < vMelhor) return melhor;
+        if (atual.seedKey && !melhor.seedKey) return atual;
+        return melhor;
+      });
+
+      lista.forEach((c) => {
+        if (c.id === manter.id) return;
+        reassignClienteId(c.id, manter.id);
+        store.clientes = store.clientes.filter((x) => x.id !== c.id);
+        ajustes++;
+      });
+
+      if (manter.seedKey) {
+        const seed = (cfg().CLIENTES_PADRAO || []).find((s) => s.seedKey === manter.seedKey);
+        if (seed && !manter.nome.includes(" ")) {
+          const rico = lista.find((c) => String(c.nome || "").includes(" "));
+          if (rico) {
+            manter.nome = rico.nome;
+            if (!manter.email) manter.email = rico.email;
+            if (!manter.telefone) manter.telefone = rico.telefone;
+          }
+        }
+      }
+    });
+
+    return ajustes;
+  }
+
   async function sincronizarBancoLogins(registrar = false) {
+    const consolidados = consolidarClientesDuplicados();
     const padrao = await garantirClientesPadrao();
     const normalizados = normalizarClientesExistentes();
-    const changed = padrao > 0 || normalizados > 0;
+    const changed = padrao > 0 || normalizados > 0 || consolidados > 0;
 
     if (changed) {
       await persistir(false);
@@ -593,8 +639,13 @@ window.JCPag = (function () {
   }
 
   async function sincronizarBanco() {
+    ready = false;
+    initPromise = null;
+    store = null;
     await init();
+
     const stats = await sincronizarBancoLogins(true);
+
     if (JCPagStore.usaSupabase() && store) {
       try {
         store = await JCPagStore.forcarSyncNuvem(store);

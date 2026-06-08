@@ -187,30 +187,35 @@ window.JCPagStore = (function () {
     return payload;
   }
 
-  function contarItens(data) {
-    return (
-      (data.clientes?.length || 0) +
-      (data.contratos?.length || 0) +
-      (data.parcelas?.length || 0) +
-      (data.logs?.length || 0)
-    );
+  function contarDadosNegocio(data) {
+    return (data.contratos?.length || 0) + (data.parcelas?.length || 0);
   }
 
   async function migrarLocalParaNuvem(remoto) {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return remoto;
 
+    const remotoQtd = contarDadosNegocio(remoto);
     const secrets = storageSecrets();
+
     for (const secret of secrets) {
       try {
         const json = await decryptWithSecret(raw, secret);
         const local = normalizarStore(JSON.parse(json));
         if (!local?.v) continue;
 
-        if (contarItens(local) > contarItens(remoto)) {
-          console.info("[JCPagStore] Migrando dados locais para o banco remoto.");
+        const localQtd = contarDadosNegocio(local);
+
+        // Só sobe local se tiver MAIS contratos/parcelas que a nuvem (nunca apaga contratos remotos)
+        if (localQtd > remotoQtd) {
+          console.info("[JCPagStore] Migrando contratos locais para o banco remoto.");
           await salvarSupabase(local);
           return local;
+        }
+
+        // Nuvem tem mais dados — atualiza cache local com a nuvem
+        if (remotoQtd > localQtd) {
+          await salvarLocal(remoto);
         }
       } catch {
         /* tenta próxima chave */
@@ -295,6 +300,7 @@ window.JCPagStore = (function () {
     storeVazio,
     usaSupabase,
     carregar,
+    carregarSupabase,
     salvar,
     resetar,
     forcarSyncNuvem,
