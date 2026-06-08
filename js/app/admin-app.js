@@ -184,6 +184,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     preencherSelectClientes();
     document.getElementById("modal-venda").showModal();
   });
+  document.getElementById("btn-sync-banco").addEventListener("click", async () => {
+    const btn = document.getElementById("btn-sync-banco");
+    btn.disabled = true;
+    try {
+      const stats = await JCPag.sincronizarBanco();
+      toast(
+        stats.changed
+          ? `Banco atualizado · ${stats.ativos} login(s) ativo(s)`
+          : `Banco OK · ${stats.ativos} login(s) ativo(s)`,
+      );
+      await renderTudo();
+    } catch (e) {
+      toast(e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  });
   document.getElementById("btn-reset").addEventListener("click", async () => {
     if (!confirm("Zerar TODOS os dados criptografados? Esta ação não pode ser desfeita.")) return;
     try {

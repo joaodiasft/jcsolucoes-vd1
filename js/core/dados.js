@@ -53,16 +53,22 @@ window.JCPag = (function () {
 
   async function garantirClientesPadrao() {
     const lista = cfg().CLIENTES_PADRAO;
-    if (!Array.isArray(lista) || !lista.length) return false;
+    if (!Array.isArray(lista) || !lista.length) return 0;
 
-    let changed = false;
+    let atualizados = 0;
 
     for (const seed of lista) {
-      if (!seed?.tokenHash || !seed?.nome) continue;
+      if (!seed?.nome) continue;
+
+      const tokenPlain = seed.token ? JCPagAuth.normalizarToken(seed.token) : null;
+      const tokenHash = tokenPlain ? await JCPagAuth.hashToken(tokenPlain) : seed.tokenHash;
+      const tokenPreview = tokenPlain ? JCPagAuth.tokenPreview(tokenPlain) : seed.tokenPreview;
+      if (!tokenHash || !tokenPreview) continue;
 
       let cliente =
         store.clientes.find((c) => c.seedKey === seed.seedKey) ||
-        store.clientes.find((c) => c.tokenHash === seed.tokenHash) ||
+        store.clientes.find((c) => c.tokenHash === tokenHash) ||
+        store.clientes.find((c) => c.tokenPreview === tokenPreview) ||
         store.clientes.find(
           (c) => String(c.nome || "").trim().toLowerCase() === String(seed.nome).trim().toLowerCase(),
         );
@@ -70,18 +76,18 @@ window.JCPag = (function () {
       if (cliente) {
         const precisaAtualizar =
           cliente.ativo === false ||
-          cliente.tokenHash !== seed.tokenHash ||
-          cliente.tokenPreview !== seed.tokenPreview ||
+          cliente.tokenHash !== tokenHash ||
+          cliente.tokenPreview !== tokenPreview ||
           cliente.seedKey !== seed.seedKey;
 
         if (precisaAtualizar) {
-          cliente.tokenHash = seed.tokenHash;
-          cliente.tokenPreview = seed.tokenPreview;
+          cliente.tokenHash = tokenHash;
+          cliente.tokenPreview = tokenPreview;
           cliente.seedKey = seed.seedKey;
           cliente.ativo = true;
           if (seed.email != null && !cliente.email) cliente.email = seed.email;
           if (seed.telefone != null && !cliente.telefone) cliente.telefone = seed.telefone;
-          changed = true;
+          atualizados++;
         }
       } else {
         store.clientes.push({
@@ -90,16 +96,108 @@ window.JCPag = (function () {
           nome: String(seed.nome).trim(),
           email: String(seed.email || "").trim(),
           telefone: String(seed.telefone || "").trim(),
-          tokenHash: seed.tokenHash,
-          tokenPreview: seed.tokenPreview,
+          tokenHash,
+          tokenPreview,
           ativo: true,
           criadoEm: hoje(),
         });
-        changed = true;
+        atualizados++;
       }
     }
 
-    return changed;
+    return atualizados;
+  }
+
+  function contarVinculosCliente(clienteId) {
+    const contratos = store.contratos.filter((c) => c.clienteId === clienteId).length;
+    const parcelas = store.parcelas.filter((p) => p.clienteId === clienteId).length;
+    return contratos + parcelas;
+  }
+
+  function reassignClienteId(deId, paraId) {
+    store.contratos.forEach((c) => {
+      if (c.clienteId === deId) c.clienteId = paraId;
+    });
+    store.parcelas.forEach((p) => {
+      if (p.clienteId === deId) p.clienteId = paraId;
+    });
+  }
+
+  function normalizarClientesExistentes() {
+    let ajustes = 0;
+    const seedKeys = new Set((cfg().CLIENTES_PADRAO || []).map((s) => s.seedKey).filter(Boolean));
+
+    store.clientes.forEach((c) => {
+      if (c.ativo === undefined) {
+        c.ativo = true;
+        ajustes++;
+      }
+    });
+
+    const porHash = new Map();
+    const idsRemover = new Set();
+
+    store.clientes.forEach((c) => {
+      if (!c.tokenHash || idsRemover.has(c.id)) return;
+
+      const existente = porHash.get(c.tokenHash);
+      if (!existente) {
+        porHash.set(c.tokenHash, c);
+        return;
+      }
+
+      const manter =
+        contarVinculosCliente(c.id) > contarVinculosCliente(existente.id)
+          ? c
+          : existente;
+      const remover = manter.id === c.id ? existente : c;
+
+      reassignClienteId(remover.id, manter.id);
+      porHash.set(c.tokenHash, manter);
+      idsRemover.add(remover.id);
+      ajustes++;
+    });
+
+    if (idsRemover.size) {
+      store.clientes = store.clientes.filter((c) => !idsRemover.has(c.id));
+    }
+
+    store.clientes.forEach((c) => {
+      if (seedKeys.has(c.seedKey) && c.ativo === false) {
+        c.ativo = true;
+        ajustes++;
+      }
+    });
+
+    return ajustes;
+  }
+
+  async function sincronizarBancoLogins(registrar = false) {
+    const padrao = await garantirClientesPadrao();
+    const normalizados = normalizarClientesExistentes();
+    const changed = padrao > 0 || normalizados > 0;
+
+    if (changed) {
+      await persistir(false);
+    }
+
+    const stats = {
+      changed,
+      padrao,
+      normalizados,
+      totalClientes: store.clientes.length,
+      ativos: store.clientes.filter((c) => c.ativo !== false && c.tokenHash).length,
+    };
+
+    if (registrar && changed) {
+      await registrarLog(
+        "Banco de logins sincronizado",
+        `${stats.ativos} cliente(s) ativo(s) · ${stats.padrao} padrão · ${stats.normalizados} ajuste(s)`,
+        getAutorAdmin(),
+      );
+    }
+
+    return stats;
   }
 
   async function init() {
@@ -116,11 +214,9 @@ window.JCPag = (function () {
         if (!store.contratos) store.contratos = [];
         if (!store.parcelas) store.parcelas = [];
         if (!store.logs) store.logs = [];
-        const clientesAtualizados = await garantirClientesPadrao();
+        await sincronizarBancoLogins(false);
         if (!store.inicializado) {
           store.inicializado = true;
-          await persistir(false);
-        } else if (clientesAtualizados) {
           await persistir(false);
         }
         sincronizarAtrasos();
@@ -491,9 +587,14 @@ window.JCPag = (function () {
     await exigirSessaoAdmin();
     store = await JCPagStore.resetar();
     store.inicializado = true;
-    await persistir(false);
+    await sincronizarBancoLogins(false);
     await registrarLog("Sistema resetado", "Base zerada pelo administrador", getAutorAdmin());
     return store;
+  }
+
+  async function sincronizarBanco() {
+    await init();
+    return sincronizarBancoLogins(true);
   }
 
   return Object.freeze({
@@ -523,6 +624,7 @@ window.JCPag = (function () {
     marcarParcelaPaga,
     registrarPagamentoPix,
     resetarSistema,
+    sincronizarBanco,
     guard: JCPagGuard,
     cfg,
   });

@@ -47,25 +47,23 @@ window.JCPAG_CONFIG = {
   },
 
   /**
-   * Clientes com token fixo — garantidos ativos a cada init (hash SHA-256 + TOKEN_PEPPER).
-   * Tokens: MIRIAN2026, GABRIEL2026 (maiúsculas, sem espaços)
+   * Clientes com token fixo — sincronizados no banco a cada init / botão Atualizar banco.
+   * Admin: jcsolucoes2026 (hash em ADMIN_TOKEN_HASH)
    */
   CLIENTES_PADRAO: [
     {
       seedKey: "mirian",
       nome: "Miriam",
+      token: "MIRIAN2026",
       email: "",
       telefone: "",
-      tokenHash: "7eba288eee134742c7a1be2ca3385f7590166e4dad42fd03a9df4ae9d6f9f5ca",
-      tokenPreview: "MIRI***",
     },
     {
       seedKey: "gabriel",
       nome: "Gabriel",
+      token: "GABRIEL2026",
       email: "",
       telefone: "",
-      tokenHash: "8edf9c5a5cb5820a31b64ab10a9b80f52c15c819825cecb26cc0d9b6466b809a",
-      tokenPreview: "GABR***",
     },
   ],
 };
