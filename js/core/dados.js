@@ -172,6 +172,48 @@ window.JCPag = (function () {
     return ajustes;
   }
 
+  function contarParcelasPagasContrato(contratoId) {
+    return store.parcelas.filter((p) => p.contratoId === contratoId && p.status === "pago").length;
+  }
+
+  function consolidarContratosDuplicados() {
+    let ajustes = 0;
+    const porChave = new Map();
+
+    store.contratos.forEach((c) => {
+      const chave = `${c.clienteId}::${String(c.servico || "").trim().toLowerCase()}`;
+      if (!porChave.has(chave)) porChave.set(chave, []);
+      porChave.get(chave).push(c);
+    });
+
+    const idsRemover = new Set();
+
+    porChave.forEach((lista) => {
+      if (lista.length < 2) return;
+
+      const manter = lista.reduce((melhor, atual) => {
+        const pagasMelhor = contarParcelasPagasContrato(melhor.id);
+        const pagasAtual = contarParcelasPagasContrato(atual.id);
+        if (pagasAtual > pagasMelhor) return atual;
+        if (pagasAtual < pagasMelhor) return melhor;
+        return String(atual.criadoEm || "") < String(melhor.criadoEm || "") ? atual : melhor;
+      });
+
+      lista.forEach((c) => {
+        if (c.id === manter.id) return;
+        store.parcelas = store.parcelas.filter((p) => p.contratoId !== c.id);
+        idsRemover.add(c.id);
+        ajustes++;
+      });
+    });
+
+    if (idsRemover.size) {
+      store.contratos = store.contratos.filter((c) => !idsRemover.has(c.id));
+    }
+
+    return ajustes;
+  }
+
   function consolidarClientesDuplicados() {
     let ajustes = 0;
     const porPreview = new Map();
@@ -219,9 +261,10 @@ window.JCPag = (function () {
 
   async function sincronizarBancoLogins(registrar = false) {
     const consolidados = consolidarClientesDuplicados();
+    const contratosLimpos = consolidarContratosDuplicados();
     const padrao = await garantirClientesPadrao();
     const normalizados = normalizarClientesExistentes();
-    const changed = padrao > 0 || normalizados > 0 || consolidados > 0;
+    const changed = padrao > 0 || normalizados > 0 || consolidados > 0 || contratosLimpos > 0;
 
     if (changed) {
       await persistir(false);
