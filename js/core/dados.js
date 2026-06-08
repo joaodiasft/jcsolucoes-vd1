@@ -641,8 +641,30 @@ window.JCPag = (function () {
   async function sincronizarBanco() {
     ready = false;
     initPromise = null;
-    store = null;
-    await init();
+
+    if (JCPagStore.usaSupabase()) {
+      try {
+        store = await JCPagStore.baixarDaNuvem();
+        if (!store.clientes) store.clientes = [];
+        if (!store.contratos) store.contratos = [];
+        if (!store.parcelas) store.parcelas = [];
+        if (!store.logs) store.logs = [];
+        ready = true;
+      } catch (e) {
+        await init();
+        return {
+          changed: false,
+          padrao: 0,
+          normalizados: 0,
+          totalClientes: store?.clientes?.length || 0,
+          ativos: 0,
+          erroNuvem: e.message,
+        };
+      }
+    } else {
+      store = null;
+      await init();
+    }
 
     const stats = await sincronizarBancoLogins(true);
 

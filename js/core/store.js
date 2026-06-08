@@ -191,37 +191,10 @@ window.JCPagStore = (function () {
     return (data.contratos?.length || 0) + (data.parcelas?.length || 0);
   }
 
-  async function migrarLocalParaNuvem(remoto) {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return remoto;
-
-    const remotoQtd = contarDadosNegocio(remoto);
-    const secrets = storageSecrets();
-
-    for (const secret of secrets) {
-      try {
-        const json = await decryptWithSecret(raw, secret);
-        const local = normalizarStore(JSON.parse(json));
-        if (!local?.v) continue;
-
-        const localQtd = contarDadosNegocio(local);
-
-        // Só sobe local se tiver MAIS contratos/parcelas que a nuvem (nunca apaga contratos remotos)
-        if (localQtd > remotoQtd) {
-          console.info("[JCPagStore] Migrando contratos locais para o banco remoto.");
-          await salvarSupabase(local);
-          return local;
-        }
-
-        // Nuvem tem mais dados — atualiza cache local com a nuvem
-        if (remotoQtd > localQtd) {
-          await salvarLocal(remoto);
-        }
-      } catch {
-        /* tenta próxima chave */
-      }
-    }
-
+  /** Baixa da nuvem e sobrescreve cache local — usado no init e em Atualizar banco */
+  async function baixarDaNuvem() {
+    const remoto = await carregarSupabase();
+    await salvarLocal(remoto);
     return remoto;
   }
 
@@ -231,15 +204,12 @@ window.JCPagStore = (function () {
     }
 
     try {
-      let remoto = await carregarSupabase();
-      remoto = await migrarLocalParaNuvem(remoto);
-      await salvarLocal(remoto);
-      return remoto;
+      return await baixarDaNuvem();
     } catch (e) {
       console.warn("[JCPagStore]", e.message);
 
       const local = await carregarLocal();
-      if (contarItens(local) > 0) {
+      if (contarDadosNegocio(local) > 0) {
         local._modoOffline = true;
         local._avisoNuvem =
           "Nuvem temporariamente indisponível. Usando cópia local — clique em Atualizar banco quando possível.";
@@ -301,6 +271,7 @@ window.JCPagStore = (function () {
     usaSupabase,
     carregar,
     carregarSupabase,
+    baixarDaNuvem,
     salvar,
     resetar,
     forcarSyncNuvem,
