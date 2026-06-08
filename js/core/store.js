@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * JCPag — Armazenamento (local legado ou Supabase produção)
+ * JCPag — Armazenamento (Supabase produção + cache local offline)
  * ============================================================================
  */
 "use strict";
@@ -8,6 +8,8 @@
 window.JCPagStore = (function () {
   const STORAGE_KEY = "jc-pag-encrypted-v2";
   const LEGACY_KEY = "jc-pagamentos-v1";
+  const RETRY_STATUS = new Set([502, 503, 504]);
+  const MAX_TENTATIVAS = 6;
 
   function cfg() {
     return window.JCPAG_CONFIG || {};
@@ -29,6 +31,10 @@ window.JCPagStore = (function () {
     };
   }
 
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
   function headersSupabase(extra = {}) {
     const key = cfg().SUPABASE_ANON_KEY;
     return {
@@ -39,22 +45,36 @@ window.JCPagStore = (function () {
     };
   }
 
-  async function carregarSupabase() {
-    const base = cfg().SUPABASE_URL.replace(/\/$/, "");
-    const res = await fetch(`${base}/rest/v1/jcpag_snapshot?id=eq.1&select=data`, {
-      headers: headersSupabase(),
-    });
+  function erroRetryavel(status, body) {
+    if (RETRY_STATUS.has(status)) return true;
+    const txt = String(body || "");
+    return txt.includes("PGRST002") || txt.includes("schema cache");
+  }
 
-    if (!res.ok) {
-      const msg = await res.text();
-      throw new Error(`Não foi possível carregar o banco remoto (${res.status}). ${msg}`);
+  async function fetchSupabase(url, options = {}) {
+    let ultimoErro = "";
+
+    for (let tent = 0; tent < MAX_TENTATIVAS; tent++) {
+      const res = await fetch(url, options);
+      if (res.ok) return res;
+
+      const body = await res.text();
+      ultimoErro = body;
+
+      if (!erroRetryavel(res.status, body) || tent === MAX_TENTATIVAS - 1) {
+        throw new Error(
+          `Banco na nuvem indisponível (${res.status}). O projeto Supabase pode estar acordando — aguarde 1 minuto e clique em Atualizar banco.`,
+        );
+      }
+
+      console.warn(`[JCPagStore] Tentativa ${tent + 1}/${MAX_TENTATIVAS} falhou (${res.status}). Reagendando…`);
+      await sleep(2000 * (tent + 1));
     }
 
-    const rows = await res.json();
-    if (!rows.length || !rows[0].data) return storeVazio();
+    throw new Error(ultimoErro || "Falha ao conectar ao banco remoto.");
+  }
 
-    const data = rows[0].data;
-    if (!data.v) throw new Error("Versão inválida no banco remoto.");
+  function normalizarStore(data) {
     if (!data.clientes) data.clientes = [];
     if (!data.contratos) data.contratos = [];
     if (!data.parcelas) data.parcelas = [];
@@ -62,24 +82,37 @@ window.JCPagStore = (function () {
     return data;
   }
 
+  async function carregarSupabase() {
+    const base = cfg().SUPABASE_URL.replace(/\/$/, "");
+    const res = await fetchSupabase(`${base}/rest/v1/jcpag_snapshot?id=eq.1&select=data`, {
+      headers: headersSupabase(),
+    });
+
+    const rows = await res.json();
+    if (!rows.length || !rows[0].data) return storeVazio();
+
+    const data = normalizarStore(rows[0].data);
+    if (!data.v) throw new Error("Versão inválida no banco remoto.");
+    return data;
+  }
+
   async function salvarSupabase(data) {
     const base = cfg().SUPABASE_URL.replace(/\/$/, "");
-    data.v = 2;
-    const res = await fetch(`${base}/rest/v1/jcpag_snapshot?id=eq.1`, {
+    const payload = normalizarStore({ ...data });
+    delete payload._modoOffline;
+    delete payload._avisoNuvem;
+    payload.v = 2;
+
+    await fetchSupabase(`${base}/rest/v1/jcpag_snapshot?id=eq.1`, {
       method: "PATCH",
       headers: headersSupabase({ Prefer: "return=minimal" }),
       body: JSON.stringify({
-        data,
+        data: payload,
         updated_at: new Date().toISOString(),
       }),
     });
 
-    if (!res.ok) {
-      const msg = await res.text();
-      throw new Error(`Não foi possível salvar no banco remoto (${res.status}). ${msg}`);
-    }
-
-    return data;
+    return payload;
   }
 
   async function resetarSupabase() {
@@ -119,10 +152,10 @@ window.JCPagStore = (function () {
       for (const secret of secrets) {
         try {
           const json = await decryptWithSecret(raw, secret);
-          const data = JSON.parse(json);
+          const data = normalizarStore(JSON.parse(json));
           if (!data.v) throw new Error("Versão inválida");
 
-          if (secret !== chaveAtual) {
+          if (secret !== chaveAtual && !usaSupabase()) {
             console.info("[JCPagStore] Dados abertos com chave legada — migrando para chave atual.");
             await salvarLocal(data);
           }
@@ -133,10 +166,7 @@ window.JCPagStore = (function () {
         }
       }
 
-      console.error("[JCPagStore] Falha ao descriptografar:", ultimoErro?.message);
-      throw new Error(
-        "Não foi possível abrir os dados salvos. Seus dados NÃO foram apagados — verifique STORAGE_SECRET em config.example.js.",
-      );
+      console.error("[JCPagStore] Falha ao descriptografar cache local:", ultimoErro?.message);
     }
 
     if (localStorage.getItem(LEGACY_KEY)) {
@@ -147,11 +177,14 @@ window.JCPagStore = (function () {
   }
 
   async function salvarLocal(data) {
-    data.v = 2;
-    const json = JSON.stringify(data);
+    const payload = normalizarStore({ ...data });
+    delete payload._modoOffline;
+    delete payload._avisoNuvem;
+    payload.v = 2;
+    const json = JSON.stringify(payload);
     const encrypted = await JCPagCrypto.encrypt(json);
     localStorage.setItem(STORAGE_KEY, encrypted);
-    return data;
+    return payload;
   }
 
   function contarItens(data) {
@@ -171,13 +204,10 @@ window.JCPagStore = (function () {
     for (const secret of secrets) {
       try {
         const json = await decryptWithSecret(raw, secret);
-        const local = JSON.parse(json);
+        const local = normalizarStore(JSON.parse(json));
         if (!local?.v) continue;
 
-        const remotoQtd = contarItens(remoto);
-        const localQtd = contarItens(local);
-
-        if (localQtd > remotoQtd) {
+        if (contarItens(local) > contarItens(remoto)) {
           console.info("[JCPagStore] Migrando dados locais para o banco remoto.");
           await salvarSupabase(local);
           return local;
@@ -191,28 +221,73 @@ window.JCPagStore = (function () {
   }
 
   async function carregar() {
-    if (usaSupabase()) {
+    if (!usaSupabase()) {
+      return carregarLocal();
+    }
+
+    try {
       let remoto = await carregarSupabase();
       remoto = await migrarLocalParaNuvem(remoto);
+      await salvarLocal(remoto);
       return remoto;
+    } catch (e) {
+      console.warn("[JCPagStore]", e.message);
+
+      const local = await carregarLocal();
+      if (contarItens(local) > 0) {
+        local._modoOffline = true;
+        local._avisoNuvem =
+          "Nuvem temporariamente indisponível. Usando cópia local — clique em Atualizar banco quando possível.";
+        return local;
+      }
+
+      const vazio = storeVazio();
+      vazio._modoOffline = true;
+      vazio._avisoNuvem =
+        "Nuvem acordando. Logins padrão serão aplicados — sincronize com Atualizar banco em 1 minuto.";
+      return vazio;
     }
-    return carregarLocal();
   }
 
   async function salvar(data) {
+    const payload = normalizarStore({ ...data });
+
     if (usaSupabase()) {
-      return salvarSupabase(data);
+      await salvarLocal(payload);
+
+      try {
+        const salvo = await salvarSupabase(payload);
+        delete salvo._modoOffline;
+        delete salvo._avisoNuvem;
+        return salvo;
+      } catch (e) {
+        console.warn("[JCPagStore] Salvo localmente; nuvem falhou:", e.message);
+        payload._modoOffline = true;
+        payload._avisoNuvem = "Alterações guardadas localmente. Clique em Atualizar banco para enviar à nuvem.";
+        return payload;
+      }
     }
-    return salvarLocal(data);
+
+    return salvarLocal(payload);
   }
 
   async function resetar() {
     if (usaSupabase()) {
+      localStorage.removeItem(STORAGE_KEY);
       return resetarSupabase();
     }
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(LEGACY_KEY);
     return storeVazio();
+  }
+
+  async function forcarSyncNuvem(data) {
+    if (!usaSupabase()) return data;
+    const salvo = await salvarSupabase(data);
+    await salvarLocal(salvo);
+    delete salvo._modoOffline;
+    delete salvo._avisoNuvem;
+    return salvo;
   }
 
   return Object.freeze({
@@ -222,5 +297,6 @@ window.JCPagStore = (function () {
     carregar,
     salvar,
     resetar,
+    forcarSyncNuvem,
   });
 })();

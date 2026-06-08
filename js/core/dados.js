@@ -594,7 +594,17 @@ window.JCPag = (function () {
 
   async function sincronizarBanco() {
     await init();
-    return sincronizarBancoLogins(true);
+    const stats = await sincronizarBancoLogins(true);
+    if (JCPagStore.usaSupabase() && store) {
+      try {
+        store = await JCPagStore.forcarSyncNuvem(store);
+        delete store._modoOffline;
+        delete store._avisoNuvem;
+      } catch (e) {
+        stats.erroNuvem = e.message;
+      }
+    }
+    return stats;
   }
 
   return Object.freeze({

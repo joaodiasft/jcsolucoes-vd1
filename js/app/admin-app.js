@@ -164,9 +164,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!sessao) return;
     }
   } catch (e) {
-    alert(e.message);
+    const msg = String(e.message || "");
+    const amigavel = msg.includes("nuvem") || msg.includes("503")
+      ? "Banco na nuvem acordando. Aguarde 1 minuto, atualize a página e use Atualizar banco."
+      : msg;
+    toast(amigavel);
     window.location.href = "index.html";
     return;
+  }
+
+  if (JCPag.dados?._avisoNuvem) {
+    toast(JCPag.dados._avisoNuvem);
   }
 
   AdminSession.init(sessao);
@@ -190,9 +198,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const stats = await JCPag.sincronizarBanco();
       toast(
-        stats.changed
-          ? `Nuvem atualizada · ${stats.ativos} login(s) ativo(s)`
-          : `Banco na nuvem OK · ${stats.ativos} login(s) ativo(s)`,
+        stats.erroNuvem
+          ? stats.erroNuvem
+          : stats.changed
+            ? `Nuvem atualizada · ${stats.ativos} login(s) ativo(s)`
+            : `Banco na nuvem OK · ${stats.ativos} login(s) ativo(s)`,
       );
       await renderTudo();
     } catch (e) {
