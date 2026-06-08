@@ -51,6 +51,57 @@ window.JCPag = (function () {
     });
   }
 
+  async function garantirClientesPadrao() {
+    const lista = cfg().CLIENTES_PADRAO;
+    if (!Array.isArray(lista) || !lista.length) return false;
+
+    let changed = false;
+
+    for (const seed of lista) {
+      if (!seed?.tokenHash || !seed?.nome) continue;
+
+      let cliente =
+        store.clientes.find((c) => c.seedKey === seed.seedKey) ||
+        store.clientes.find((c) => c.tokenHash === seed.tokenHash) ||
+        store.clientes.find(
+          (c) => String(c.nome || "").trim().toLowerCase() === String(seed.nome).trim().toLowerCase(),
+        );
+
+      if (cliente) {
+        const precisaAtualizar =
+          cliente.ativo === false ||
+          cliente.tokenHash !== seed.tokenHash ||
+          cliente.tokenPreview !== seed.tokenPreview ||
+          cliente.seedKey !== seed.seedKey;
+
+        if (precisaAtualizar) {
+          cliente.tokenHash = seed.tokenHash;
+          cliente.tokenPreview = seed.tokenPreview;
+          cliente.seedKey = seed.seedKey;
+          cliente.ativo = true;
+          if (seed.email != null && !cliente.email) cliente.email = seed.email;
+          if (seed.telefone != null && !cliente.telefone) cliente.telefone = seed.telefone;
+          changed = true;
+        }
+      } else {
+        store.clientes.push({
+          id: uid(),
+          seedKey: seed.seedKey,
+          nome: String(seed.nome).trim(),
+          email: String(seed.email || "").trim(),
+          telefone: String(seed.telefone || "").trim(),
+          tokenHash: seed.tokenHash,
+          tokenPreview: seed.tokenPreview,
+          ativo: true,
+          criadoEm: hoje(),
+        });
+        changed = true;
+      }
+    }
+
+    return changed;
+  }
+
   async function init() {
     if (ready) return store;
     if (initPromise) return initPromise;
@@ -65,8 +116,11 @@ window.JCPag = (function () {
         if (!store.contratos) store.contratos = [];
         if (!store.parcelas) store.parcelas = [];
         if (!store.logs) store.logs = [];
+        const clientesAtualizados = await garantirClientesPadrao();
         if (!store.inicializado) {
           store.inicializado = true;
+          await persistir(false);
+        } else if (clientesAtualizados) {
           await persistir(false);
         }
         sincronizarAtrasos();
